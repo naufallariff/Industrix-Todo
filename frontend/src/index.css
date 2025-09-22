@@ -1,68 +1,238 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --color-dark-blue: #1c2a78;
+  --color-purple: #6c22a7;
+  --color-turquoise: #2be7a8;
+  --gradient-futuristic: linear-gradient(
+    90deg,
+    var(--color-dark-blue) 0%,
+    var(--color-purple) 50%,
+    var(--color-turquoise) 100%
+  );
+  --gradient-footer: linear-gradient(
+    90deg,
+    var(--color-dark-blue),
+    var(--color-purple),
+    var(--color-turquoise)
+  );
+  --gradient-high: linear-gradient(90deg, #ff4d4f 0%, #faad14 100%);
+  --gradient-medium: linear-gradient(90deg, #faad14 0%, #52c41a 100%);
+  --gradient-low: linear-gradient(90deg, #52c41a 0%, #108ee9 100%);
+  --background-light: linear-gradient(135deg, #f0f2f5 0%, #fff 100%);
 }
 
 body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background: var(--background-light);
+  background-size: 400% 400%;
+  animation: gradient-animation 15s ease infinite;
   margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.main-container {
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 24px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.ant-btn-primary {
+  background: var(--gradient-futuristic) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: bold;
 }
 
-button {
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.app-header {
+  background-color: #fff !important;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  max-width: 900px;
+  width: 100%;
+}
+
+.ant-layout-header .ant-typography,
+.ant-layout-header .anticon {
+  color: #333;
+}
+
+.gradient-text {
+  background: var(--gradient-futuristic);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-footer {
+  background: var(--gradient-footer);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ant-card {
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  transition: background-color 0.3s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.ant-card .ant-card-head-title,
+.ant-card .ant-typography {
+  color: #333;
+}
+
+.tag-priority-high {
+  background: var(--gradient-high) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.tag-priority-medium {
+  background: var(--gradient-medium) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.tag-priority-low {
+  background: var(--gradient-low) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.search-bar-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-bar-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c8c8c;
+  z-index: 1;
+}
+
+.search-input {
+  padding-left: 36px !important;
+}
+
+.ant-input-affix-wrapper {
+  border-radius: 6px !important;
+  border: 1px solid #d9d9d9 !important;
+  background-color: #fff !important;
+  box-shadow: none !important;
+}
+
+.ant-input-affix-wrapper:focus-within {
+  border-color: var(--color-purple) !important;
+  box-shadow: 0 0 0 2px rgba(108, 34, 167, 0.2) !important;
+}
+
+.ant-input {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.todo-item-completed {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+  box-shadow: none;
+  color: #aaa;
+}
+
+.todo-item-completed .ant-typography-secondary {
+  color: #aaa;
+}
+
+.todo-item .ant-typography-secondary {
+  color: #777;
+}
+
+.ant-checkbox-inner {
+  border-color: #d9d9d9 !important;
+  background-color: transparent !important;
+}
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--color-purple) !important;
+  border-color: var(--color-purple) !important;
+}
+
+.ant-checkbox-checked:after {
+  border-color: var(--color-purple) !important;
+}
+
+.ant-form-item {
+  margin-bottom: 24px;
+}
+
+.ant-modal-footer {
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.ant-tag {
+  border: none !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+.ant-select-selector {
+  border-radius: 6px !important;
+  border: 1px solid #d9d9d9 !important;
+}
+
+.ant-select-selector:focus-within {
+  border-color: var(--color-purple) !important;
+  box-shadow: 0 0 0 2px rgba(108, 34, 167, 0.2) !important;
 }

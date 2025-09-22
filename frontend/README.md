@@ -1,69 +1,22 @@
-# React + TypeScript + Vite
+Aplikasi To-Do List - Frontend
+Aplikasi To-Do List ini dibangun menggunakan React, TypeScript, dan Ant Design. Tampilan UI mengikuti gaya minimalis dan profesional dengan fokus pada kerapian dan fungsionalitas toggle dark/light mode.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Cara Menjalankan Aplikasi
+Instalasi Dependensi
+Pastikan Anda berada di dalam folder frontend di terminal, lalu jalankan perintah berikut untuk menginstal semua paket yang diperlukan:
 
-Currently, two official plugins are available:
+npm install
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Menjalankan Mode Pengembangan
+Setelah instalasi selesai, jalankan aplikasi di mode pengembangan:
 
-## Expanding the ESLint configuration
+npm run dev
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Aplikasi akan berjalan di http://localhost:5173.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Cara Melakukan Build
+Untuk membuat versi produksi dari aplikasi, jalankan perintah berikut:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+File-file statis akan dibuat di folder dist.
