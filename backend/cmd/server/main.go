@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/naufallariff/Industrix-Todo/backend/config"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/api/router"
-	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
-	"log"
+	// "github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -24,12 +25,14 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Optional: Run migrations (for development/testing)
+	// NOTE: db.AutoMigrate should be handled by separate migration scripts in a production environment.
+	// For local development, uncomment this block if you want GORM to create the tables.
+
 	// if err := db.AutoMigrate(&domain.Category{}, &domain.Todo{}); err != nil {
 	// 	log.Fatalf("Failed to run migrations: %v", err)
 	// }
 
-	log.Println("Database connection successful and migrations are up to date.")
+	log.Println("Database connection successful.")
 
 	// 3. Setup Gin router
 	r := gin.Default()
@@ -37,8 +40,8 @@ func main() {
 	// 4. Setup routes and inject dependencies
 	router.SetupRoutes(r, db)
 
-	// 5. Run the server
-	if err := r.Run(":8080"); err != nil {
+	// 5. Run the server on port 4000
+	if err := r.Run(":4000"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }

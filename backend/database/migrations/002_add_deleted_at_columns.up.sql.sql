@@ -1,0 +1,2 @@
+ALTER TABLE categories ADD COLUMN deleted_at TIMESTAMPTZ;
+ALTER TABLE todos ADD COLUMN deleted_at TIMESTAMPTZ;

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/service"
-
+    "github.com/naufallariff/Industrix-Todo/backend/internal/util"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -60,12 +60,14 @@ func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 
 	todo, err := h.service.GetTodoByID(uint(id))
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve todo"})
-		return
+    if err != nil {
+        if err == gorm.ErrRecordNotFound {
+            util.ErrorResponse(c, http.StatusNotFound, "Todo not found")
+            return
+        }
+        util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve todo")
+        return
+    }
 	}
 	c.JSON(http.StatusOK, todo)
 }
