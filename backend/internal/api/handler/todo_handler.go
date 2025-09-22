@@ -60,14 +60,12 @@ func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 
 	todo, err := h.service.GetTodoByID(uint(id))
 	if err != nil {
-    if err != nil {
         if err == gorm.ErrRecordNotFound {
             util.ErrorResponse(c, http.StatusNotFound, "Todo not found")
             return
         }
         util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve todo")
         return
-    }
 	}
 	c.JSON(http.StatusOK, todo)
 }
