@@ -132,24 +132,6 @@ body {
   border: none !important;
 }
 
-.search-bar-container {
-  position: relative;
-  width: 100%;
-}
-
-.search-bar-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #8c8c8c;
-  z-index: 1;
-}
-
-.search-input {
-  padding-left: 36px !important;
-}
-
 .ant-input-affix-wrapper {
   border-radius: 6px !important;
   border: 1px solid #d9d9d9 !important;
@@ -164,7 +146,6 @@ body {
 
 .ant-input {
   background-color: transparent !important;
-  border: none !important;
   box-shadow: none !important;
 }
 

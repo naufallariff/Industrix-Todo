@@ -15,7 +15,7 @@ interface TodoListProps {
     onEditTodo: (todo: Todo) => void;
     onDeleteTodo: (id: number) => void;
     onToggleCompleted: (id: number) => void;
-}   
+}
 
 const TodoList: React.FC<TodoListProps> = ({
     todos,
@@ -87,15 +87,13 @@ const TodoList: React.FC<TodoListProps> = ({
             }
         >
             <Space direction="vertical" style={{ marginBottom: '16px', width: '100%' }}>
-                <div className="search-bar-container">
-                    <SearchOutlined className="search-bar-icon" />
-                    <Input
-                        placeholder="Cari To-Do..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                </div>
+                <Input
+                    placeholder="Cari To-Do..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    prefix={<SearchOutlined style={{ marginRight: '8px' }} />}
+                    className="custom-search-input"
+                />
                 <TodoFilters onFilterChange={handleFilterChange} categories={allCategories} />
             </Space>
 
