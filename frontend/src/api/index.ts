@@ -1,9 +1,7 @@
-// frontend/src/api/index.ts
 import axios from 'axios';
 import type { Todo, Category } from '../types';
 
-// Pastikan tidak ada trailing slash di akhir URL
-const API_BASE_URL = 'http://localhost:4000/api/v1';
+const API_BASE_URL = '/api/v1';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -11,7 +9,6 @@ const apiClient = axios.create({
         'Content-Type': 'application/json',
     },
 });
-
 export interface GetTodosParams {
     page?: number;
     limit?: number;
@@ -57,7 +54,7 @@ export interface CreateCategoryPayload {
 
 export const getTodos = async (params: GetTodosParams = {}): Promise<GetTodosResponse> => {
     try {
-        const response = await apiClient.get<GetTodosResponse>('/todos/', { params });
+        const response = await apiClient.get<GetTodosResponse>('/todos', { params });
         return response.data;
     } catch (error) {
         console.error('Error fetching todos:', error);
@@ -67,7 +64,7 @@ export const getTodos = async (params: GetTodosParams = {}): Promise<GetTodosRes
 
 export const createTodo = async (newTodo: CreateTodoPayload): Promise<Todo> => {
     try {
-        const response = await apiClient.post<Todo>('/todos/', newTodo);
+        const response = await apiClient.post<Todo>('/todos', newTodo);
         return response.data;
     } catch (error) {
         console.error('Error creating todo:', error);
@@ -77,7 +74,8 @@ export const createTodo = async (newTodo: CreateTodoPayload): Promise<Todo> => {
 
 export const updateTodo = async (editedTodo: UpdateTodoPayload): Promise<Todo> => {
     try {
-        const response = await apiClient.put<Todo>(`/todos/${editedTodo.id}/`, editedTodo);
+        // PERBAIKAN: Menghapus trailing slash dari URL
+        const response = await apiClient.put<Todo>(`/todos/${editedTodo.id}`, editedTodo);
         return response.data;
     } catch (error) {
         console.error('Error updating todo:', error);
@@ -87,7 +85,8 @@ export const updateTodo = async (editedTodo: UpdateTodoPayload): Promise<Todo> =
 
 export const deleteTodo = async (id: number): Promise<void> => {
     try {
-        await apiClient.delete(`/todos/${id}/`);
+        // PERBAIKAN: Menghapus trailing slash dari URL
+        await apiClient.delete(`/todos/${id}`);
     } catch (error) {
         console.error('Error deleting todo:', error);
         throw error;
@@ -96,7 +95,8 @@ export const deleteTodo = async (id: number): Promise<void> => {
 
 export const toggleTodoCompletion = async (id: number, completed: boolean): Promise<Todo> => {
     try {
-        const response = await apiClient.patch<Todo>(`/todos/${id}/complete/`, { completed });
+        // PERBAIKAN: Menghapus trailing slash dari URL
+        const response = await apiClient.patch<Todo>(`/todos/${id}/complete`, { completed });
         return response.data;
     } catch (error) {
         console.error('Error toggling todo completion:', error);
@@ -106,7 +106,7 @@ export const toggleTodoCompletion = async (id: number, completed: boolean): Prom
 
 export const getCategories = async (): Promise<Category[]> => {
     try {
-        const response = await apiClient.get<Category[]>('/categories/');
+        const response = await apiClient.get<Category[]>('/categories');
         return response.data;
     } catch (error) {
         console.error('Error fetching categories:', error);
@@ -116,10 +116,20 @@ export const getCategories = async (): Promise<Category[]> => {
 
 export const createCategory = async (newCategory: CreateCategoryPayload): Promise<Category> => {
     try {
-        const response = await apiClient.post<Category>('/categories/', newCategory);
+        const response = await apiClient.post<Category>('/categories', newCategory);
         return response.data;
     } catch (error) {
         console.error('Error creating category:', error);
         throw error;
     }
 };
+
+// FITUR BARU: Menambahkan fungsi untuk menghapus kategori
+export const deleteCategory = async (id: number): Promise<void> => {
+    try {
+        await apiClient.delete(`/categories/${id}`);
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        throw error;
+    }
+}

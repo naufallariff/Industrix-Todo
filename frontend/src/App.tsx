@@ -11,12 +11,14 @@ const { Content, Footer } = Layout;
 const { Text } = Typography;
 
 const App: React.FC = () => {
+  // PERBAIKAN: Menggunakan hook message untuk mendapatkan messageApi dan contextHolder
+  const [messageApi, contextHolder] = message.useMessage();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
   const [filters, setFilters] = useState<GetTodosParams>({});
@@ -38,18 +40,18 @@ const App: React.FC = () => {
         current: apiPagination.page,
       }));
     } catch (error) {
-      message.error('Gagal memuat daftar tugas.');
+      messageApi.error('Gagal memuat daftar tugas.');
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, filters, searchTerm]);
+  }, [pagination.current, pagination.pageSize, filters, searchTerm, messageApi]); // Tambahkan messageApi ke dependency array
 
   const fetchCategories = async () => {
     try {
       const data = await getCategories();
       setCategories(data);
     } catch (error) {
-      message.error('Gagal memuat kategori.');
+      messageApi.error('Gagal memuat kategori.');
     }
   };
 
@@ -71,10 +73,10 @@ const App: React.FC = () => {
         priority: newTodo.priority,
       };
       await createTodo(payload);
-      message.success('To-do berhasil ditambahkan!');
+      messageApi.success('To-do berhasil ditambahkan!');
       fetchTodos();
     } catch (error) {
-      message.error('Gagal menambahkan to-do.');
+      messageApi.error('Gagal menambahkan to-do.');
     }
   };
 
@@ -89,20 +91,20 @@ const App: React.FC = () => {
         priority: editedTodo.priority,
       };
       await updateTodo(payload);
-      message.success('To-do berhasil diperbarui!');
+      messageApi.success('To-do berhasil diperbarui!');
       fetchTodos();
     } catch (error) {
-      message.error('Gagal memperbarui to-do.');
+      messageApi.error('Gagal memperbarui to-do.');
     }
   };
 
   const handleDeleteTodo = async (id: number) => {
     try {
       await deleteTodo(id);
-      message.success('To-do berhasil dihapus!');
+      messageApi.success('To-do berhasil dihapus!');
       fetchTodos();
     } catch (error) {
-      message.error('Gagal menghapus to-do.');
+      messageApi.error('Gagal menghapus to-do.');
     }
   };
 
@@ -112,10 +114,10 @@ const App: React.FC = () => {
 
     try {
       await toggleTodoCompletion(id, !todoToUpdate.completed);
-      message.success('Status to-do berhasil diperbarui!');
+      messageApi.success('Status to-do berhasil diperbarui!');
       fetchTodos();
     } catch (error) {
-      message.error('Gagal memperbarui status to-do.');
+      messageApi.error('Gagal memperbarui status to-do.');
     }
   };
 
@@ -142,6 +144,8 @@ const App: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
+      {/* PERBAIKAN: Menambahkan contextHolder */}
+      {contextHolder}
       <Header />
       <Content className="main-container">
         <TodoList

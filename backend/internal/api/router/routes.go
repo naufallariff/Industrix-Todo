@@ -9,21 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// SetupRoutes initializes all API handlers and registers their routes.
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
-	// Initialize repositories
 	todoRepo := repository.NewTodoRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 
-	// Initialize services
 	todoService := service.NewTodoService(todoRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 
-	// Initialize handlers
 	todoHandler := handler.NewTodoHandler(todoService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 
-	// API group with versioning
 	v1 := r.Group("/api/v1")
 	{
 		// Todos endpoints
@@ -39,6 +34,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		categories := v1.Group("/categories")
 		categories.GET("/", categoryHandler.GetAllCategories)
 		categories.POST("/", categoryHandler.CreateCategory)
+		categories.GET("/:id", categoryHandler.GetCategoryByID)
 		categories.PUT("/:id", categoryHandler.UpdateCategory)
 		categories.DELETE("/:id", categoryHandler.DeleteCategory)
 	}

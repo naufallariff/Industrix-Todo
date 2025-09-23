@@ -22,15 +22,18 @@ const TodoForm: React.FC<TodoFormProps> = ({
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        ...initialValues,
-        description: initialValues.description?.String, 
-      });
-    } else {
-      form.resetFields();
+    if (visible) {
+      if (initialValues) {
+        form.setFieldsValue({
+          ...initialValues,
+          description: initialValues.description?.String,
+          category: initialValues.category?.id,
+        });
+      } else {
+        form.resetFields();
+      }
     }
-  }, [initialValues, form]);
+  }, [initialValues, form, visible]);
 
   const handleOk = () => {
     form
@@ -39,13 +42,12 @@ const TodoForm: React.FC<TodoFormProps> = ({
         const selectedCategory = categories.find(
           (cat) => cat.id === values.category
         );
-        if (selectedCategory) {
-          onOk({
-            ...values,
-            category: selectedCategory, // Mengembalikan objek category
-            completed: values.completed || false,
-          });
-        }
+        onOk({
+          ...values,
+          category: selectedCategory,
+          completed: values.completed || false,
+        });
+        form.resetFields();
       })
       .catch((info) => {
         console.log("Validation Failed:", info);
@@ -60,7 +62,8 @@ const TodoForm: React.FC<TodoFormProps> = ({
       onCancel={onCancel}
       okText={initialValues ? "Simpan" : "Tambah"}
     >
-      <Form form={form} layout="vertical" name="todo_form"> 
+      {/* PERBAIKAN: Meneruskan instance form ke komponen Form */}
+      <Form form={form} layout="vertical" name="todo_form">
         <Form.Item
           name="title"
           label="Judul"

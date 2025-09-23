@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Select, Space, Modal, Form, Input, Button, ColorPicker } from 'antd';
-import { PlusOutlined } from '@ant-design/icons'; 
+import { Select, Space, Modal, Form, Input, Button, ColorPicker, Tooltip } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Category } from '../types';
-import { createCategory } from '../api';
+import { createCategory, deleteCategory } from '../api';
 
 const { Option } = Select;
 interface TodoFiltersProps {
@@ -46,6 +46,25 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
         }
     };
 
+    // FITUR BARU: Fungsi untuk menghapus kategori dengan konfirmasi
+    const handleDeleteCategory = (categoryId: number) => {
+        Modal.confirm({
+            title: 'Konfirmasi Hapus Kategori',
+            content: 'Apakah Anda yakin ingin menghapus kategori ini? To-Do yang terkait tidak akan terhapus.',
+            okText: 'Hapus',
+            okType: 'danger',
+            cancelText: 'Batal',
+            onOk: async () => {
+                try {
+                    await deleteCategory(categoryId);
+                    onCategoriesUpdate();
+                } catch (error) {
+                    console.error('Gagal menghapus kategori:', error);
+                }
+            },
+        });
+    };
+
     const handleCategoryFilter = (value: number | 'all') => {
         onFilterChange({ category_id: value === 'all' ? undefined : value });
     }
@@ -70,8 +89,24 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
                 )}
             >
                 <Option key="all" value="all">Semua</Option>
-                {categories.map(category => (
-                    <Option key={category.id} value={category.id}>{category.name}</Option>
+                {categories.filter(c => c.id).map(category => (
+                    <Option key={category.id} value={category.id}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            {category.name}
+                            <Tooltip title="Hapus Kategori">
+                                <Button
+                                    icon={<DeleteOutlined />}
+                                    size="small"
+                                    type="text"
+                                    danger
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteCategory(category.id);
+                                    }}
+                                />
+                            </Tooltip>
+                        </div>
+                    </Option>
                 ))}
             </Select>
             <Select

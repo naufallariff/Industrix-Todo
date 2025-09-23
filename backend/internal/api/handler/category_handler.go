@@ -87,3 +87,23 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	}
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
+    idStr := c.Param("id")
+    id, err := strconv.ParseUint(idStr, 10, 64)
+    if err != nil {
+        util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID", err.Error())
+        return
+    }
+
+    category, err := h.service.FindCategoryByID(uint(id))
+    if err != nil {
+        if err == gorm.ErrRecordNotFound {
+            util.ErrorResponse(c, http.StatusNotFound, "Category not found")
+            return
+        }
+        util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve category", err.Error())
+        return
+    }
+    c.JSON(http.StatusOK, category)
+}

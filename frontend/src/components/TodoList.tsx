@@ -1,4 +1,3 @@
-// frontend/src/components/TodoList.tsx
 import React, { useState } from 'react';
 import { Card, Input, List, Button, Typography, Pagination, Empty, Space } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
