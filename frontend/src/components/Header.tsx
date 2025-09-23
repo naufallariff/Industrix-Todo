@@ -12,7 +12,7 @@ const Header: React.FC = () => {
       <div className="header-content">
         <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <img src="./assets/logo.png" alt="logo" style={{ height: '32px', display: 'block' }} />
+            <img src="/assets/logo.png" alt="logo" style={{ height: '32px', display: 'block' }} />
             <Title level={3} className="gradient-text" style={{ margin: 0 }}>
               Industrix Todo
             </Title>

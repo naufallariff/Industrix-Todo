@@ -1,3 +1,4 @@
+// frontend/src/components/TodoItem.tsx
 import React from 'react';
 import { Typography, Space, Button, Checkbox, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -23,12 +24,6 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onDelete, onToggleCompleted, 
         }
     };
 
-    const getCategoryColor = (category: string) => {
-        const colors = ['#108ee9', '#87d068', '#f50', '#2db7f5', '#8a65f5', '#eb2f96'];
-        const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        return colors[hash % colors.length];
-    };
-
     return (
         <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -44,7 +39,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onDelete, onToggleCompleted, 
                     {todo.description}
                 </Text>
                 <Space size="small" style={{ marginTop: '8px' }}>
-                    <Tag color={getCategoryColor(todo.category)}>{todo.category}</Tag>
+                    <Tag color={todo.category.color}>{todo.category.name}</Tag>
                     <Tag className={getPriorityColor(todo.priority)}>
                         {todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}
                     </Tag>

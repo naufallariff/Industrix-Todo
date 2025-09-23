@@ -1,40 +1,141 @@
-import React, { useState } from 'react';
-import { Layout, Typography } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Layout, Typography, message } from 'antd';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
-import type { Todo } from './types';
-import { mockTodos } from './mockData';
+import type { Todo, Category } from './types';
+import { getTodos, createTodo, updateTodo, deleteTodo, toggleTodoCompletion, getCategories } from './api';
+import type { GetTodosParams } from './api';
 
 const { Content, Footer } = Layout;
 const { Text } = Typography;
 
 const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>(mockTodos);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [filters, setFilters] = useState<GetTodosParams>({});
 
-  const handleAddTodo = (newTodo: Omit<Todo, 'id'>) => {
-    const newId = todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1;
-    setTodos(prevTodos => [
-      { ...newTodo, id: newId },
-      ...prevTodos,
-    ]);
+  const fetchTodos = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, pagination: apiPagination } = await getTodos({
+        page: pagination.current,
+        limit: pagination.pageSize,
+        ...filters,
+      });
+      setTodos(data);
+      setPagination(prev => ({
+        ...prev,
+        total: apiPagination.total,
+        current: apiPagination.page,
+      }));
+    } catch (error) {
+      message.error('Gagal memuat daftar tugas.');
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.current, pagination.pageSize, filters]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      message.error('Gagal memuat kategori.');
+    }
   };
 
-  const handleEditTodo = (editedTodo: Todo) => {
-    setTodos(prevTodos =>
-      prevTodos.map(todo => (todo.id === editedTodo.id ? editedTodo : todo))
-    );
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
+    try {
+      const payload = {
+        title: newTodo.title,
+        description: newTodo.description,
+        completed: newTodo.completed,
+        category_id: newTodo.category.id,
+        priority: newTodo.priority,
+      };
+      await createTodo(payload);
+      message.success('To-do berhasil ditambahkan!');
+      fetchTodos();
+    } catch (error) {
+      message.error('Gagal menambahkan to-do.');
+    }
   };
 
-  const handleDeleteTodo = (id: number) => {
-    setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+  const handleEditTodo = async (editedTodo: Todo) => {
+    try {
+      const payload = {
+        id: editedTodo.id,
+        title: editedTodo.title,
+        description: editedTodo.description,
+        completed: editedTodo.completed,
+        category_id: editedTodo.category.id,
+        priority: editedTodo.priority,
+      };
+      await updateTodo(payload);
+      message.success('To-do berhasil diperbarui!');
+      fetchTodos();
+    } catch (error) {
+      message.error('Gagal memperbarui to-do.');
+    }
   };
 
-  const handleToggleCompleted = (id: number) => {
-    setTodos(prevTodos =>
-      prevTodos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      await deleteTodo(id);
+      message.success('To-do berhasil dihapus!');
+      fetchTodos();
+    } catch (error) {
+      message.error('Gagal menghapus to-do.');
+    }
+  };
+
+  const handleToggleCompleted = async (id: number) => {
+    const todoToUpdate = todos.find(t => t.id === id);
+    if (!todoToUpdate) return;
+
+    try {
+      await toggleTodoCompletion(id, !todoToUpdate.completed);
+      message.success('Status to-do berhasil diperbarui!');
+      fetchTodos();
+    } catch (error) {
+      message.error('Gagal memperbarui status to-do.');
+    }
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    setFilters(prev => ({ ...prev, search: searchTerm }));
+    setPagination(prev => ({ ...prev, current: 1 }));
+  };
+
+  // Implementasi Debouncing
+  const debouncedSearch = useCallback((searchTerm: string) => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  const handleFilter = (newFilters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setPagination(prev => ({ ...prev, current: 1 }));
+  };
+
+  const handlePageChange = (page: number, pageSize: number) => {
+    setPagination(prev => ({ ...prev, current: page, pageSize }));
   };
 
   return (
@@ -43,6 +144,16 @@ const App: React.FC = () => {
       <Content className="main-container">
         <TodoList
           todos={todos}
+          categories={categories}
+          loading={loading}
+          pagination={{
+            total: pagination.total,
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            onChange: handlePageChange,
+          }}
+          onSearch={debouncedSearch} // Menggunakan debouncedSearch
+          onFilter={handleFilter}
           onAddTodo={handleAddTodo}
           onEditTodo={handleEditTodo}
           onDeleteTodo={handleDeleteTodo}

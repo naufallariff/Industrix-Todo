@@ -4,13 +4,22 @@ import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import TodoItem from './TodoItem';
 import TodoForm from './TodoForm';
 import TodoFilters from './TodoFilters';
-import type { Todo } from '../types';
-
+import type { Todo, Category } from '../types';
 
 const { Title } = Typography;
 
 interface TodoListProps {
     todos: Todo[];
+    categories: Category[];
+    loading: boolean;
+    pagination: {
+        total: number;
+        current: number;
+        pageSize: number;
+        onChange: (page: number, pageSize: number) => void;
+    };
+    onSearch: (searchTerm: string) => void;
+    onFilter: (filters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => void;
     onAddTodo: (todo: Omit<Todo, 'id'>) => void;
     onEditTodo: (todo: Todo) => void;
     onDeleteTodo: (id: number) => void;
@@ -19,6 +28,11 @@ interface TodoListProps {
 
 const TodoList: React.FC<TodoListProps> = ({
     todos,
+    categories,
+    loading,
+    pagination,
+    onSearch,
+    onFilter,
     onAddTodo,
     onEditTodo,
     onDeleteTodo,
@@ -27,9 +41,6 @@ const TodoList: React.FC<TodoListProps> = ({
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTodo, setEditingTodo] = useState<Todo | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [filters, setFilters] = useState<{ category?: string | 'all'; priority?: 'low' | 'medium' | 'high' | 'all' }>({});
-    const pageSize = 10;
 
     const handleAdd = () => {
         setEditingTodo(undefined);
@@ -55,24 +66,18 @@ const TodoList: React.FC<TodoListProps> = ({
         setEditingTodo(undefined);
     };
 
-    const handleFilterChange = (newFilters: { category?: string | 'all'; priority?: 'low' | 'medium' | 'high' | 'all' }) => {
-        setFilters(prev => ({ ...prev, ...newFilters }));
-        setCurrentPage(1);
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        onSearch(value); // Memanggil debouncedSearch dari prop
     };
 
-    const allCategories = ['Semua', ...new Set(todos.map(todo => todo.category))];
-
-    const filteredTodos = todos.filter(todo => {
-        const matchesSearch = todo.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = !filters.category || filters.category === 'Semua' || todo.category === filters.category;
-        const matchesPriority = !filters.priority || filters.priority === 'all' || todo.priority === filters.priority;
-        return matchesSearch && matchesCategory && matchesPriority;
-    });
-
-    const paginatedTodos = filteredTodos.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-    );
+    const handleFilterChange = (newFilters: { category?: number | 'all'; priority?: 'low' | 'medium' | 'high' | 'all' }) => {
+        onFilter({
+            category_id: newFilters.category === 'all' ? undefined : newFilters.category,
+            priority: newFilters.priority === 'all' ? undefined : newFilters.priority,
+        });
+    };
 
     return (
         <Card
@@ -85,22 +90,23 @@ const TodoList: React.FC<TodoListProps> = ({
                     Tambah To-Do
                 </Button>
             }
+            loading={loading}
         >
             <Space direction="vertical" style={{ marginBottom: '16px', width: '100%' }}>
                 <Input
                     placeholder="Cari To-Do..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                     prefix={<SearchOutlined style={{ marginRight: '8px' }} />}
                     className="custom-search-input"
                 />
-                <TodoFilters onFilterChange={handleFilterChange} categories={allCategories} />
+                <TodoFilters onFilterChange={handleFilterChange} categories={categories} />
             </Space>
 
-            {paginatedTodos.length > 0 ? (
+            {todos.length > 0 ? (
                 <List
                     itemLayout="vertical"
-                    dataSource={paginatedTodos}
+                    dataSource={todos}
                     renderItem={(item) => (
                         <TodoItem
                             key={item.id}
@@ -115,12 +121,12 @@ const TodoList: React.FC<TodoListProps> = ({
                 <Empty description="Tidak ada to-do yang ditemukan." />
             )}
 
-            {filteredTodos.length > pageSize && (
+            {pagination.total > pagination.pageSize && (
                 <Pagination
-                    current={currentPage}
-                    pageSize={pageSize}
-                    total={filteredTodos.length}
-                    onChange={(page) => setCurrentPage(page)}
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
+                    total={pagination.total}
+                    onChange={pagination.onChange}
                     style={{ textAlign: 'center', marginTop: '16px' }}
                 />
             )}
@@ -129,6 +135,7 @@ const TodoList: React.FC<TodoListProps> = ({
                 onCancel={handleModalCancel}
                 onOk={handleModalOk}
                 initialValues={editingTodo}
+                categories={categories}
             />
         </Card>
     );
