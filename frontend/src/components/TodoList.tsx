@@ -5,9 +5,9 @@ import TodoItem from './TodoItem';
 import TodoForm from './TodoForm';
 import TodoFilters from './TodoFilters';
 import type { Todo, Category } from '../types';
+import type { MessageInstance } from 'antd/es/message/interface';
 
 const { Title } = Typography;
-
 interface TodoListProps {
     todos: Todo[];
     categories: Category[];
@@ -26,6 +26,7 @@ interface TodoListProps {
     onDeleteTodo: (id: number) => void;
     onToggleCompleted: (id: number) => void;
     onCategoriesUpdate: () => void;
+    messageApi: MessageInstance;
 }
 
 const TodoList: React.FC<TodoListProps> = ({
@@ -41,6 +42,7 @@ const TodoList: React.FC<TodoListProps> = ({
     onDeleteTodo,
     onToggleCompleted,
     onCategoriesUpdate,
+    messageApi,
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTodo, setEditingTodo] = useState<Todo | undefined>(undefined);
@@ -71,7 +73,7 @@ const TodoList: React.FC<TodoListProps> = ({
 
     const handleModalOk = (values: Omit<Todo, 'id'>) => {
         if (editingTodo) {
-            onEditTodo({ id: editingTodo.id, ...values });
+            onEditTodo({ id: editingTodo.id, ...values } as Todo);
         } else {
             onAddTodo(values);
         }
@@ -104,7 +106,7 @@ const TodoList: React.FC<TodoListProps> = ({
                     prefix={<SearchOutlined style={{ marginRight: '8px' }} />}
                     className="custom-search-input"
                 />
-                <TodoFilters onFilterChange={handleFilterChange} categories={categories} onCategoriesUpdate={onCategoriesUpdate} />
+                <TodoFilters onFilterChange={handleFilterChange} categories={categories} onCategoriesUpdate={onCategoriesUpdate} messageApi={messageApi} />
             </Space>
             {todos.length > 0 ? (
                 <List

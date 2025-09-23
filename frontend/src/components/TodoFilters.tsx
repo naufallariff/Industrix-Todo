@@ -3,14 +3,15 @@ import { Select, Space, Modal, Form, Input, Button, ColorPicker, Tooltip } from 
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Category } from '../types';
 import { createCategory, deleteCategory } from '../api';
-import { message } from 'antd';
 
 const { Option } = Select;
+import type { MessageInstance } from 'antd/es/message/interface';
 
 interface TodoFiltersProps {
     onFilterChange: (filters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => void;
     categories: Category[];
     onCategoriesUpdate: () => void;
+    messageApi: MessageInstance;
 }
 
 const generateRandomDarkColor = () => {
@@ -27,7 +28,7 @@ const generateRandomDarkColor = () => {
     } while (true);
 };
 
-const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, onCategoriesUpdate }) => {
+const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, onCategoriesUpdate, messageApi }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [color, setColor] = useState<string>(generateRandomDarkColor());
@@ -43,10 +44,10 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
             await createCategory({ name: values.name, color });
             setIsModalVisible(false);
             onCategoriesUpdate();
-            message.success('Kategori berhasil dibuat!');
+            messageApi.success('Kategori berhasil dibuat!');
         } catch (error) {
             console.error('Gagal membuat kategori baru:', error);
-            message.error('Gagal membuat kategori.');
+            messageApi.error('Gagal membuat kategori.');
         }
     };
 
@@ -61,10 +62,10 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
                 try {
                     await deleteCategory(categoryId);
                     onCategoriesUpdate();
-                    message.success('Kategori berhasil dihapus!');
+                    messageApi.success('Kategori berhasil dihapus!');
                 } catch (error) {
                     console.error('Gagal menghapus kategori:', error);
-                    message.error('Gagal menghapus kategori.');
+                    messageApi.error('Gagal menghapus kategori.');
                 }
             },
         });

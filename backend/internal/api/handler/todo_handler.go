@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/service"
-    "github.com/naufallariff/Industrix-Todo/backend/internal/util"
-	"github.com/gin-gonic/gin"
+	"github.com/naufallariff/Industrix-Todo/backend/internal/util"
 	"gorm.io/gorm"
 )
 
@@ -35,13 +36,11 @@ func (h *TodoHandler) GetTodos(c *gin.Context) {
 		return
 	}
 
-	// Constructing pagination info
-	totalPages := (total + int64(limit) - 1) / int64(limit)
 	pagination := gin.H{
-		"current_page": page,
-		"per_page":     limit,
-		"total":        total,
-		"total_pages":  totalPages,
+		"page":  page,
+		"limit": limit,
+		"total": total,
+		"pages": (total + int64(limit) - 1) / int64(limit),
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -49,7 +48,6 @@ func (h *TodoHandler) GetTodos(c *gin.Context) {
 		"pagination": pagination,
 	})
 }
-
 func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -60,12 +58,12 @@ func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 
 	todo, err := h.service.GetTodoByID(uint(id))
 	if err != nil {
-        if err == gorm.ErrRecordNotFound {
-            util.ErrorResponse(c, http.StatusNotFound, "Todo not found")
-            return
-        }
-        util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve todo")
-        return
+		if err == gorm.ErrRecordNotFound {
+			util.ErrorResponse(c, http.StatusNotFound, "Todo not found")
+			return
+		}
+		util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve todo")
+		return
 	}
 	c.JSON(http.StatusOK, todo)
 }
@@ -139,7 +137,8 @@ func (h *TodoHandler) DeleteTodo(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteTodo(uint(id)); err != nil {
+	err = h.service.DeleteTodo(uint(id))
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
 			return
@@ -147,5 +146,6 @@ func (h *TodoHandler) DeleteTodo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete todo"})
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+
+	c.Status(http.StatusOK)
 }

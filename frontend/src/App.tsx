@@ -9,18 +9,18 @@ import type { GetTodosParams, CreateTodoPayload, UpdateTodoPayload } from './api
 const { Content, Footer } = Layout;
 const { Text } = Typography;
 
-const App: React.FC = () => {
+export default function App() {
   const [messageApi, contextHolder] = message.useMessage();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
   const [filters, setFilters] = useState<GetTodosParams>({});
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -32,17 +32,23 @@ const App: React.FC = () => {
         search: searchTerm,
       });
       setTodos(data);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         total: apiPagination.total,
         current: apiPagination.page,
       }));
     } catch (error) {
-      messageApi.error('Gagal memuat daftar tugas.');
+      messageApi.error("Gagal memuat daftar tugas.");
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, filters, searchTerm, messageApi]);
+  }, [
+    pagination.current,
+    pagination.pageSize,
+    filters,
+    searchTerm,
+    messageApi,
+  ]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -61,7 +67,7 @@ const App: React.FC = () => {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
+  const handleAddTodo = async (newTodo: Omit<Todo, "id">) => {
     try {
       const payload: CreateTodoPayload = {
         title: newTodo.title,
@@ -71,10 +77,10 @@ const App: React.FC = () => {
         priority: newTodo.priority,
       };
       await createTodo(payload);
-      messageApi.success('To-do berhasil ditambahkan!');
+      messageApi.success("To-do berhasil ditambahkan!");
       fetchTodos();
     } catch (error) {
-      messageApi.error('Gagal menambahkan to-do.');
+      messageApi.error("Gagal menambahkan to-do.");
     }
   };
 
@@ -89,59 +95,65 @@ const App: React.FC = () => {
         priority: editedTodo.priority,
       };
       await updateTodo(payload);
-      messageApi.success('To-do berhasil diperbarui!');
+      messageApi.success("To-do berhasil diperbarui!");
       fetchTodos();
     } catch (error) {
-      messageApi.error('Gagal memperbarui to-do.');
+      messageApi.error("Gagal memperbarui to-do.");
     }
   };
 
   const handleDeleteTodo = async (id: number) => {
     try {
       await deleteTodo(id);
-      messageApi.success('To-do berhasil dihapus!');
+      messageApi.success("To-do berhasil dihapus!");
       fetchTodos();
     } catch (error) {
-      messageApi.error('Gagal menghapus to-do.');
+      messageApi.error("Gagal menghapus to-do.");
     }
   };
 
   const handleToggleCompleted = async (id: number) => {
-    const todoToUpdate = todos.find(t => t.id === id);
+    const todoToUpdate = todos.find((t) => t.id === id);
     if (!todoToUpdate) return;
 
     try {
       await toggleTodoCompletion(id, !todoToUpdate.completed);
-      messageApi.success('Status to-do berhasil diperbarui!');
+      messageApi.success("Status to-do berhasil diperbarui!");
       fetchTodos();
     } catch (error) {
-      messageApi.error('Gagal memperbarui status to-do.');
+      messageApi.error("Gagal memperbarui status to-do.");
     }
   };
 
   const handleSearch = useCallback((searchTerm: string) => {
     setSearchTerm(searchTerm);
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
   }, []);
 
-  const debouncedSearch = useCallback((searchTerm: string) => {
-    const timeoutId = setTimeout(() => {
-      handleSearch(searchTerm);
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [handleSearch]);
+  const debouncedSearch = useCallback(
+    (searchTerm: string) => {
+      const timeoutId = setTimeout(() => {
+        handleSearch(searchTerm);
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    },
+    [handleSearch]
+  );
 
-  const handleFilter = (newFilters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, current: 1 }));
+  const handleFilter = (newFilters: {
+    category_id?: number | undefined;
+    priority?: "low" | "medium" | "high" | undefined;
+  }) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
   const handlePageChange = (page: number, pageSize: number) => {
-    setPagination(prev => ({ ...prev, current: page, pageSize }));
+    setPagination((prev) => ({ ...prev, current: page, pageSize }));
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
+    <Layout style={{ minHeight: "100vh", backgroundColor: "#f0f2f5" }}>
       {contextHolder}
       <Header />
       <Content className="main-container">
@@ -163,15 +175,25 @@ const App: React.FC = () => {
           onDeleteTodo={handleDeleteTodo}
           onToggleCompleted={handleToggleCompleted}
           onCategoriesUpdate={fetchCategories}
+          messageApi={messageApi}
         />
       </Content>
-      <Footer style={{ textAlign: 'center', background: 'transparent' }}>
+      <Footer style={{ textAlign: "center", background: "transparent" }}>
         <Text type="secondary">
-          Dibuat oleh <span className="gradient-text-footer"><b><a href="https://github.com/naufallariff" target="_blank" rel="noopener noreferrer">naufallariff</a></b></span>
+          Dibuat oleh{" "}
+          <span className="gradient-text-footer">
+            <b>
+              <a
+                href="https://github.com/naufallariff"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                naufallariff
+              </a>
+            </b>
+          </span>
         </Text>
       </Footer>
     </Layout>
   );
 };
-
-export default App;

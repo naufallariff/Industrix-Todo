@@ -9,6 +9,7 @@ export interface Category {
 }
 
 export interface Todo {
+    [x: string]: any;
     id: number;
     title: string;
     description?: { String: string; Valid: boolean };
