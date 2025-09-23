@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
+	"gorm.io/gorm"
 )
 
 type TodoRepository interface {
@@ -31,9 +31,10 @@ func (r *todoRepository) FindWithPaginationAndSearch(page, limit int, search, st
 		query = query.Where("title ILIKE ?", "%"+search+"%")
 	}
 	if status != "" {
-		if status == "completed" {
+		switch status {
+		case "completed":
 			query = query.Where("completed = ?", true)
-		} else if status == "incomplete" {
+		case "incomplete":
 			query = query.Where("completed = ?", false)
 		}
 	}

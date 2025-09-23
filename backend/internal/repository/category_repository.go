@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
+	"gorm.io/gorm"
 )
 
 type CategoryRepository interface {
