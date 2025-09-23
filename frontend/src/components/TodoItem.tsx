@@ -1,4 +1,3 @@
-// frontend/src/components/TodoItem.tsx
 import React from 'react';
 import { Typography, Space, Button, Checkbox, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -36,10 +35,10 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onDelete, onToggleCompleted, 
                     {todo.title}
                 </Title>
                 <Text type="secondary" style={{ display: 'block', color: 'inherit' }}>
-                    {todo.description}
+                    {todo.description?.Valid ? todo.description.String : ''}
                 </Text>
                 <Space size="small" style={{ marginTop: '8px' }}>
-                    <Tag color={todo.category.color}>{todo.category.name}</Tag>
+                    {todo.category && <Tag color={todo.category.color}>{todo.category.name}</Tag>}
                     <Tag className={getPriorityColor(todo.priority)}>
                         {todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}
                     </Tag>

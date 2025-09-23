@@ -11,8 +11,8 @@ export interface Category {
 export interface Todo {
     id: number;
     title: string;
-    description?: string; // Diubah menjadi opsional
+    description?: { String: string; Valid: boolean };
     completed: boolean;
-    category: Category;
+    category?: Category;
     priority: 'low' | 'medium' | 'high';
 }

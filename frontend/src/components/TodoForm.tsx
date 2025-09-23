@@ -1,4 +1,3 @@
-// frontend/src/components/TodoForm.tsx
 import React, { useEffect } from "react";
 import { Modal, Form, Input, Checkbox, Select } from "antd";
 import type { Todo, Category } from "../types";
@@ -26,7 +25,7 @@ const TodoForm: React.FC<TodoFormProps> = ({
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
-        category: initialValues.category.id, // Menggunakan ID untuk form
+        description: initialValues.description?.String, 
       });
     } else {
       form.resetFields();
@@ -61,7 +60,7 @@ const TodoForm: React.FC<TodoFormProps> = ({
       onCancel={onCancel}
       okText={initialValues ? "Simpan" : "Tambah"}
     >
-      <Form form={form} layout="vertical" name="todo_form">
+      <Form form={form} layout="vertical" name="todo_form"> 
         <Form.Item
           name="title"
           label="Judul"

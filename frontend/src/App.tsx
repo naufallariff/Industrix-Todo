@@ -1,10 +1,11 @@
+// frontend/src/App.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Typography, message } from 'antd';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
 import type { Todo, Category } from './types';
 import { getTodos, createTodo, updateTodo, deleteTodo, toggleTodoCompletion, getCategories } from './api';
-import type { GetTodosParams } from './api';
+import type { GetTodosParams, CreateTodoPayload, UpdateTodoPayload } from './api';
 
 const { Content, Footer } = Layout;
 const { Text } = Typography;
@@ -19,6 +20,7 @@ const App: React.FC = () => {
     total: 0,
   });
   const [filters, setFilters] = useState<GetTodosParams>({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -27,6 +29,7 @@ const App: React.FC = () => {
         page: pagination.current,
         limit: pagination.pageSize,
         ...filters,
+        search: searchTerm,
       });
       setTodos(data);
       setPagination(prev => ({
@@ -39,7 +42,7 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, filters]);
+  }, [pagination.current, pagination.pageSize, filters, searchTerm]);
 
   const fetchCategories = async () => {
     try {
@@ -60,11 +63,11 @@ const App: React.FC = () => {
 
   const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
     try {
-      const payload = {
+      const payload: CreateTodoPayload = {
         title: newTodo.title,
-        description: newTodo.description,
+        description: newTodo.description?.String,
         completed: newTodo.completed,
-        category_id: newTodo.category.id,
+        category_id: newTodo.category?.id,
         priority: newTodo.priority,
       };
       await createTodo(payload);
@@ -77,12 +80,12 @@ const App: React.FC = () => {
 
   const handleEditTodo = async (editedTodo: Todo) => {
     try {
-      const payload = {
+      const payload: UpdateTodoPayload = {
         id: editedTodo.id,
         title: editedTodo.title,
-        description: editedTodo.description,
+        description: editedTodo.description?.String,
         completed: editedTodo.completed,
-        category_id: editedTodo.category.id,
+        category_id: editedTodo.category?.id,
         priority: editedTodo.priority,
       };
       await updateTodo(payload);
@@ -116,18 +119,17 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setFilters(prev => ({ ...prev, search: searchTerm }));
+  const handleSearch = useCallback((searchTerm: string) => {
+    setSearchTerm(searchTerm);
     setPagination(prev => ({ ...prev, current: 1 }));
-  };
+  }, []);
 
-  // Implementasi Debouncing
   const debouncedSearch = useCallback((searchTerm: string) => {
     const timeoutId = setTimeout(() => {
       handleSearch(searchTerm);
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [handleSearch]);
 
   const handleFilter = (newFilters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -152,12 +154,14 @@ const App: React.FC = () => {
             pageSize: pagination.pageSize,
             onChange: handlePageChange,
           }}
-          onSearch={debouncedSearch} // Menggunakan debouncedSearch
+          searchTerm={searchTerm}
+          onSearch={debouncedSearch}
           onFilter={handleFilter}
           onAddTodo={handleAddTodo}
           onEditTodo={handleEditTodo}
           onDeleteTodo={handleDeleteTodo}
           onToggleCompleted={handleToggleCompleted}
+          onCategoriesUpdate={fetchCategories}
         />
       </Content>
       <Footer style={{ textAlign: 'center', background: 'transparent' }}>
