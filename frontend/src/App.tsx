@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Typography, message } from 'antd';
 import Header from './components/Header';
@@ -11,14 +10,13 @@ const { Content, Footer } = Layout;
 const { Text } = Typography;
 
 const App: React.FC = () => {
-  // PERBAIKAN: Menggunakan hook message untuk mendapatkan messageApi dan contextHolder
   const [messageApi, contextHolder] = message.useMessage();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 5,
+    pageSize: 10,
     total: 0,
   });
   const [filters, setFilters] = useState<GetTodosParams>({});
@@ -44,16 +42,16 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, filters, searchTerm, messageApi]); // Tambahkan messageApi ke dependency array
+  }, [pagination.current, pagination.pageSize, filters, searchTerm, messageApi]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await getCategories();
       setCategories(data);
     } catch (error) {
       messageApi.error('Gagal memuat kategori.');
     }
-  };
+  }, [messageApi]);
 
   useEffect(() => {
     fetchTodos();
@@ -61,7 +59,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
     try {
@@ -144,7 +142,6 @@ const App: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-      {/* PERBAIKAN: Menambahkan contextHolder */}
       {contextHolder}
       <Header />
       <Content className="main-container">

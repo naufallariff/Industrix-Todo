@@ -9,6 +9,7 @@ const apiClient = axios.create({
         'Content-Type': 'application/json',
     },
 });
+
 export interface GetTodosParams {
     page?: number;
     limit?: number;
@@ -27,7 +28,6 @@ export interface GetTodosResponse {
     };
 }
 
-// UBAH: Sesuaikan payload untuk backend. description adalah string biasa.
 export interface CreateTodoPayload {
     title: string;
     description?: string;
@@ -36,7 +36,6 @@ export interface CreateTodoPayload {
     priority: 'low' | 'medium' | 'high';
 }
 
-// UBAH: Sesuaikan payload untuk backend. description adalah string biasa.
 export interface UpdateTodoPayload {
     id: number;
     title?: string;
@@ -46,7 +45,6 @@ export interface UpdateTodoPayload {
     priority?: 'low' | 'medium' | 'high';
 }
 
-// Perbaikan: Tambahkan interface CreateCategoryPayload yang hilang
 export interface CreateCategoryPayload {
     name: string;
     color: string;
@@ -74,7 +72,6 @@ export const createTodo = async (newTodo: CreateTodoPayload): Promise<Todo> => {
 
 export const updateTodo = async (editedTodo: UpdateTodoPayload): Promise<Todo> => {
     try {
-        // PERBAIKAN: Menghapus trailing slash dari URL
         const response = await apiClient.put<Todo>(`/todos/${editedTodo.id}`, editedTodo);
         return response.data;
     } catch (error) {
@@ -85,7 +82,6 @@ export const updateTodo = async (editedTodo: UpdateTodoPayload): Promise<Todo> =
 
 export const deleteTodo = async (id: number): Promise<void> => {
     try {
-        // PERBAIKAN: Menghapus trailing slash dari URL
         await apiClient.delete(`/todos/${id}`);
     } catch (error) {
         console.error('Error deleting todo:', error);
@@ -95,7 +91,6 @@ export const deleteTodo = async (id: number): Promise<void> => {
 
 export const toggleTodoCompletion = async (id: number, completed: boolean): Promise<Todo> => {
     try {
-        // PERBAIKAN: Menghapus trailing slash dari URL
         const response = await apiClient.patch<Todo>(`/todos/${id}/complete`, { completed });
         return response.data;
     } catch (error) {
@@ -123,11 +118,10 @@ export const createCategory = async (newCategory: CreateCategoryPayload): Promis
         throw error;
     }
 };
-
-// FITUR BARU: Menambahkan fungsi untuk menghapus kategori
 export const deleteCategory = async (id: number): Promise<void> => {
     try {
-        await apiClient.delete(`/categories/${id}`);
+        const response = await apiClient.delete(`/categories/${id}`);
+        return response.data;
     } catch (error) {
         console.error('Error deleting category:', error);
         throw error;

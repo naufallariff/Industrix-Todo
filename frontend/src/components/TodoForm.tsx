@@ -23,14 +23,13 @@ const TodoForm: React.FC<TodoFormProps> = ({
 
   useEffect(() => {
     if (visible) {
+      form.resetFields();
       if (initialValues) {
         form.setFieldsValue({
           ...initialValues,
           description: initialValues.description?.String,
           category: initialValues.category?.id,
         });
-      } else {
-        form.resetFields();
       }
     }
   }, [initialValues, form, visible]);
@@ -62,7 +61,6 @@ const TodoForm: React.FC<TodoFormProps> = ({
       onCancel={onCancel}
       okText={initialValues ? "Simpan" : "Tambah"}
     >
-      {/* PERBAIKAN: Meneruskan instance form ke komponen Form */}
       <Form form={form} layout="vertical" name="todo_form">
         <Form.Item
           name="title"

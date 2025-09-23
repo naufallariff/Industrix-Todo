@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, Input, List, Button, Typography, Pagination, Empty, Space } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import TodoItem from './TodoItem';
@@ -44,6 +44,20 @@ const TodoList: React.FC<TodoListProps> = ({
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTodo, setEditingTodo] = useState<Todo | undefined>(undefined);
+    const [currentSearchTerm, setCurrentSearchTerm] = useState(searchTerm);
+
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setCurrentSearchTerm(value);
+        onSearch(value);
+    }, [onSearch]);
+
+    const handleFilterChange = useCallback((newFilters: { category?: number | 'all'; priority?: 'low' | 'medium' | 'high' | 'all' }) => {
+        onFilter({
+            category_id: newFilters.category === 'all' ? undefined : newFilters.category as number | undefined,
+            priority: newFilters.priority === 'all' ? undefined : newFilters.priority,
+        });
+    }, [onFilter]);
 
     const handleAdd = () => {
         setEditingTodo(undefined);
@@ -57,7 +71,7 @@ const TodoList: React.FC<TodoListProps> = ({
 
     const handleModalOk = (values: Omit<Todo, 'id'>) => {
         if (editingTodo) {
-            onEditTodo({ ...editingTodo, ...values });
+            onEditTodo({ id: editingTodo.id, ...values });
         } else {
             onAddTodo(values);
         }
@@ -67,13 +81,6 @@ const TodoList: React.FC<TodoListProps> = ({
     const handleModalCancel = () => {
         setIsModalVisible(false);
         setEditingTodo(undefined);
-    };
-
-    const handleFilterChange = (newFilters: { category?: number | 'all'; priority?: 'low' | 'medium' | 'high' | 'all' }) => {
-        onFilter({
-            category_id: newFilters.category === 'all' ? undefined : newFilters.category as number | undefined,
-            priority: newFilters.priority === 'all' ? undefined : newFilters.priority,
-        });
     };
 
     return (
@@ -92,14 +99,13 @@ const TodoList: React.FC<TodoListProps> = ({
             <Space direction="vertical" style={{ marginBottom: '16px', width: '100%' }}>
                 <Input
                     placeholder="Cari To-Do..."
-                    value={searchTerm}
-                    onChange={(e) => onSearch(e.target.value)}
+                    value={currentSearchTerm}
+                    onChange={handleSearchChange}
                     prefix={<SearchOutlined style={{ marginRight: '8px' }} />}
                     className="custom-search-input"
                 />
                 <TodoFilters onFilterChange={handleFilterChange} categories={categories} onCategoriesUpdate={onCategoriesUpdate} />
             </Space>
-
             {todos.length > 0 ? (
                 <List
                     itemLayout="vertical"
@@ -117,7 +123,6 @@ const TodoList: React.FC<TodoListProps> = ({
             ) : (
                 <Empty description="Tidak ada to-do yang ditemukan." />
             )}
-
             {pagination.total > pagination.pageSize && (
                 <Pagination
                     current={pagination.current}

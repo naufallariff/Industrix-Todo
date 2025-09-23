@@ -3,8 +3,10 @@ import { Select, Space, Modal, Form, Input, Button, ColorPicker, Tooltip } from 
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Category } from '../types';
 import { createCategory, deleteCategory } from '../api';
+import { message } from 'antd';
 
 const { Option } = Select;
+
 interface TodoFiltersProps {
     onFilterChange: (filters: { category_id?: number | undefined; priority?: 'low' | 'medium' | 'high' | undefined }) => void;
     categories: Category[];
@@ -41,12 +43,13 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
             await createCategory({ name: values.name, color });
             setIsModalVisible(false);
             onCategoriesUpdate();
+            message.success('Kategori berhasil dibuat!');
         } catch (error) {
             console.error('Gagal membuat kategori baru:', error);
+            message.error('Gagal membuat kategori.');
         }
     };
 
-    // FITUR BARU: Fungsi untuk menghapus kategori dengan konfirmasi
     const handleDeleteCategory = (categoryId: number) => {
         Modal.confirm({
             title: 'Konfirmasi Hapus Kategori',
@@ -58,8 +61,10 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
                 try {
                     await deleteCategory(categoryId);
                     onCategoriesUpdate();
+                    message.success('Kategori berhasil dihapus!');
                 } catch (error) {
                     console.error('Gagal menghapus kategori:', error);
+                    message.error('Gagal menghapus kategori.');
                 }
             },
         });
@@ -73,53 +78,55 @@ const TodoFilters: React.FC<TodoFiltersProps> = ({ onFilterChange, categories, o
     }
 
     return (
-        <Space style={{ marginBottom: '16px', width: '100%' }} wrap>
-            <Select
-                placeholder="Filter Kategori"
-                style={{ flex: 1, minWidth: '150px' }}
-                allowClear
-                onChange={handleCategoryFilter}
-                popupRender={(menu) => (
-                    <>
-                        {menu}
-                        <Button type="text" icon={<PlusOutlined />} onClick={handleOpenModal} style={{ width: '100%', textAlign: 'left', paddingLeft: '12px' }}>
-                            Tambah Kategori Baru
-                        </Button>
-                    </>
-                )}
-            >
-                <Option key="all" value="all">Semua</Option>
-                {categories.filter(c => c.id).map(category => (
-                    <Option key={category.id} value={category.id}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            {category.name}
-                            <Tooltip title="Hapus Kategori">
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    size="small"
-                                    type="text"
-                                    danger
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteCategory(category.id);
-                                    }}
-                                />
-                            </Tooltip>
-                        </div>
-                    </Option>
-                ))}
-            </Select>
-            <Select
-                placeholder="Filter Prioritas"
-                style={{ flex: 1, minWidth: '150px' }}
-                allowClear
-                onChange={handlePriorityFilter}
-            >
-                <Option key="all" value="all">Semua</Option>
-                <Option key="high" value="high">Tinggi</Option>
-                <Option key="medium" value="medium">Sedang</Option>
-                <Option key="low" value="low">Rendah</Option>
-            </Select>
+        <Space direction="vertical" style={{ marginBottom: '16px', width: '100%' }}>
+            <Space style={{ marginBottom: '16px', width: '100%' }} wrap>
+                <Select
+                    placeholder="Filter Kategori"
+                    style={{ flex: 1, minWidth: '150px' }}
+                    allowClear
+                    onChange={handleCategoryFilter}
+                    popupRender={(menu) => (
+                        <>
+                            {menu}
+                            <Button type="text" icon={<PlusOutlined />} onClick={handleOpenModal} style={{ width: '100%', textAlign: 'left', paddingLeft: '12px' }}>
+                                Tambah Kategori Baru
+                            </Button>
+                        </>
+                    )}
+                >
+                    <Option key="all" value="all">Semua</Option>
+                    {categories.map(category => (
+                        <Option key={category.id} value={category.id}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {category.name}
+                                <Tooltip title="Hapus Kategori">
+                                    <Button
+                                        icon={<DeleteOutlined />}
+                                        size="small"
+                                        type="text"
+                                        danger
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteCategory(category.id);
+                                        }}
+                                    />
+                                </Tooltip>
+                            </div>
+                        </Option>
+                    ))}
+                </Select>
+                <Select
+                    placeholder="Filter Prioritas"
+                    style={{ flex: 1, minWidth: '150px' }}
+                    allowClear
+                    onChange={handlePriorityFilter}
+                >
+                    <Option key="all" value="all">Semua</Option>
+                    <Option key="high" value="high">Tinggi</Option>
+                    <Option key="medium" value="medium">Sedang</Option>
+                    <Option value="low">Rendah</Option>
+                </Select>
+            </Space>
             <Modal
                 title="Tambah Kategori Baru"
                 open={isModalVisible}
