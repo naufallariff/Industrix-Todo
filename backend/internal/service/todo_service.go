@@ -8,7 +8,7 @@ import (
 )
 
 type TodoService interface {
-	GetTodos(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error)
+	GetTodos(page, limit int, search, status string, categoryID *uuid.UUID, priority string) ([]domain.Todo, int64, error)
 	GetTodoByID(id uuid.UUID) (*domain.Todo, error)
 	CreateTodo(req domain.NewTodoRequest) (*domain.Todo, error)
 	UpdateTodo(id uuid.UUID, req domain.UpdateTodoRequest) (*domain.Todo, error)
@@ -24,7 +24,7 @@ func NewTodoService(repo repository.TodoRepository) TodoService {
 	return &todoService{repo: repo}
 }
 
-func (s *todoService) GetTodos(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error) {
+func (s *todoService) GetTodos(page, limit int, search, status string, categoryID *uuid.UUID, priority string) ([]domain.Todo, int64, error) {
 	return s.repo.FindWithPaginationAndSearch(page, limit, search, status, categoryID, priority)
 }
 

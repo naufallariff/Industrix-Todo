@@ -26,15 +26,25 @@ func (h *TodoHandler) GetTodos(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	search := c.DefaultQuery("search", "")
 	status := c.DefaultQuery("status", "")
-	categoryID := c.DefaultQuery("category_id", "")
+	categoryIDStr := c.DefaultQuery("category_id", "")
 	priority := c.DefaultQuery("priority", "")
 
 	page, _ := strconv.Atoi(pageStr)
 	limit, _ := strconv.Atoi(limitStr)
 
+	var categoryID *uuid.UUID
+	if categoryIDStr != "" {
+		parsedID, err := uuid.Parse(categoryIDStr)
+		if err != nil {
+			util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID format")
+			return
+		}
+		categoryID = &parsedID
+	}
+
 	todos, total, err := h.service.GetTodos(page, limit, search, status, categoryID, priority)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve todos"})
+		util.ErrorResponse(c, http.StatusInternalServerError, "failed to retrieve todos", err.Error())
 		return
 	}
 

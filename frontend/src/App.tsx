@@ -1,26 +1,43 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Typography, message } from 'antd';
+import { Layout, Typography, message, Card, Button, Space } from 'antd';
+import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
+import TodoFilters from './components/TodoFilters';
+import TodoForm from './components/TodoForm';
+import CategoryManagementModal from './components/CategoryManagementModal';
 import type { Todo, Category } from './types';
 import { getTodos, createTodo, updateTodo, deleteTodo, toggleTodoCompletion, getCategories } from './api';
 import type { GetTodosParams, CreateTodoPayload, UpdateTodoPayload } from './api';
 
 const { Content, Footer } = Layout;
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
-export default function App() {
+const App: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 5,
+    pageSize: 10,
     total: 0,
   });
   const [filters, setFilters] = useState<GetTodosParams>({});
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const [isTodoModalVisible, setIsTodoModalVisible] = useState(false);
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | undefined>(undefined);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      messageApi.error('Gagal memuat kategori.');
+    }
+  }, [messageApi]);
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -32,32 +49,17 @@ export default function App() {
         search: searchTerm,
       });
       setTodos(data);
-      setPagination((prev) => ({
+      setPagination(prev => ({
         ...prev,
         total: apiPagination.total,
         current: apiPagination.page,
       }));
     } catch (error) {
-      messageApi.error("Gagal memuat daftar tugas.");
+      messageApi.error('Gagal memuat daftar tugas.');
     } finally {
       setLoading(false);
     }
-  }, [
-    pagination.current,
-    pagination.pageSize,
-    filters,
-    searchTerm,
-    messageApi,
-  ]);
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (error) {
-      messageApi.error('Gagal memuat kategori.');
-    }
-  }, [messageApi]);
+  }, [pagination.current, pagination.pageSize, filters, searchTerm, messageApi]);
 
   useEffect(() => {
     fetchTodos();
@@ -67,7 +69,7 @@ export default function App() {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleAddTodo = async (newTodo: Omit<Todo, "id">) => {
+  const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
     try {
       const payload: CreateTodoPayload = {
         title: newTodo.title,
@@ -77,10 +79,10 @@ export default function App() {
         priority: newTodo.priority,
       };
       await createTodo(payload);
-      messageApi.success("To-do berhasil ditambahkan!");
+      messageApi.success('To-do berhasil ditambahkan!');
       fetchTodos();
     } catch (error) {
-      messageApi.error("Gagal menambahkan to-do.");
+      messageApi.error('Gagal menambahkan to-do.');
     }
   };
 
@@ -95,105 +97,138 @@ export default function App() {
         priority: editedTodo.priority,
       };
       await updateTodo(payload);
-      messageApi.success("To-do berhasil diperbarui!");
+      messageApi.success('To-do berhasil diperbarui!');
       fetchTodos();
     } catch (error) {
-      messageApi.error("Gagal memperbarui to-do.");
+      messageApi.error('Gagal memperbarui to-do.');
     }
   };
 
-  const handleDeleteTodo = async (id: number) => {
+  const handleDeleteTodo = async (id: string) => {
     try {
       await deleteTodo(id);
-      messageApi.success("To-do berhasil dihapus!");
+      messageApi.success('To-do berhasil dihapus!');
       fetchTodos();
     } catch (error) {
-      messageApi.error("Gagal menghapus to-do.");
+      messageApi.error('Gagal menghapus to-do.');
     }
   };
 
-  const handleToggleCompleted = async (id: number) => {
-    const todoToUpdate = todos.find((t) => t.id === id);
+  const handleToggleCompleted = async (id: string) => {
+    const todoToUpdate = todos.find(t => t.id === id);
     if (!todoToUpdate) return;
 
     try {
       await toggleTodoCompletion(id, !todoToUpdate.completed);
-      messageApi.success("Status to-do berhasil diperbarui!");
+      messageApi.success('Status to-do berhasil diperbarui!');
       fetchTodos();
     } catch (error) {
-      messageApi.error("Gagal memperbarui status to-do.");
+      messageApi.error('Gagal memperbarui status to-do.');
     }
   };
 
-  const handleSearch = useCallback((searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setPagination((prev) => ({ ...prev, current: 1 }));
-  }, []);
-
-  const debouncedSearch = useCallback(
-    (searchTerm: string) => {
-      const timeoutId = setTimeout(() => {
-        handleSearch(searchTerm);
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    },
-    [handleSearch]
-  );
-
-  const handleFilter = (newFilters: {
-    category_id?: number | undefined;
-    priority?: "low" | "medium" | "high" | undefined;
-  }) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPagination((prev) => ({ ...prev, current: 1 }));
+  const handleOpenTodoModal = (todo?: Todo) => {
+    setEditingTodo(todo);
+    setIsTodoModalVisible(true);
   };
 
+  const handleCloseTodoModal = () => {
+    setIsTodoModalVisible(false);
+    setEditingTodo(undefined);
+  };
+
+  const handleOpenCategoryModal = () => {
+    setIsCategoryModalVisible(true);
+  };
+
+  const handleCloseCategoryModal = () => {
+    setIsCategoryModalVisible(false);
+  };
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setPagination(prev => ({ ...prev, current: 1 }));
+  }, []);
+
+  const handleFilter = useCallback((newFilters: { category_id?: string; priority?: 'low' | 'medium' | 'high' }) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setPagination(prev => ({ ...prev, current: 1 }));
+  }, []);
+
   const handlePageChange = (page: number, pageSize: number) => {
-    setPagination((prev) => ({ ...prev, current: page, pageSize }));
+    setPagination(prev => ({ ...prev, current: page, pageSize }));
   };
 
   return (
-    <Layout style={{ minHeight: "100vh", backgroundColor: "#f0f2f5" }}>
+    <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
       {contextHolder}
       <Header />
       <Content className="main-container">
-        <TodoList
-          todos={todos}
-          categories={categories}
-          loading={loading}
-          pagination={{
-            total: pagination.total,
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            onChange: handlePageChange,
-          }}
-          searchTerm={searchTerm}
-          onSearch={debouncedSearch}
-          onFilter={handleFilter}
-          onAddTodo={handleAddTodo}
-          onEditTodo={handleEditTodo}
-          onDeleteTodo={handleDeleteTodo}
-          onToggleCompleted={handleToggleCompleted}
-          onCategoriesUpdate={fetchCategories}
-          messageApi={messageApi}
-        />
+        <Title level={2} className="gradient-text">To-Do Dashboard</Title>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '900px' }}>
+          <Card
+            title="Filter & Pencarian"
+            extra={
+              <Space>
+                <Button key="manage" onClick={handleOpenCategoryModal} icon={<SettingOutlined />}>
+                  Kelola Kategori
+                </Button>
+                <Button key="add" type="primary" onClick={() => handleOpenTodoModal(undefined)} icon={<PlusOutlined />}>
+                  Tambah To-Do
+                </Button>
+              </Space>
+            }
+          >
+            <TodoFilters
+              categories={categories}
+              searchTerm={searchTerm}
+              onSearch={handleSearch}
+              onFilter={handleFilter}
+            />
+          </Card>
+          <TodoList
+            todos={todos}
+            loading={loading}
+            pagination={{
+              total: pagination.total,
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              onChange: handlePageChange,
+            }}
+            onDeleteTodo={handleDeleteTodo}
+            onToggleCompleted={handleToggleCompleted}
+            onEdit={handleOpenTodoModal}
+          />
+        </div>
       </Content>
-      <Footer style={{ textAlign: "center", background: "transparent" }}>
+      <Footer style={{ textAlign: 'center', background: 'transparent' }}>
         <Text type="secondary">
-          Dibuat oleh{" "}
-          <span className="gradient-text-footer">
-            <b>
-              <a
-                href="https://github.com/naufallariff"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                naufallariff
-              </a>
-            </b>
-          </span>
+          Dibuat oleh <span className="gradient-text-footer"><b><a href="https://github.com/naufallariff" target="_blank" rel="noopener noreferrer">naufallariff</a></b></span>
         </Text>
       </Footer>
+      <TodoForm
+        visible={isTodoModalVisible}
+        onCancel={handleCloseTodoModal}
+        onOk={(values) => {
+          if (editingTodo) {
+            handleEditTodo({ id: editingTodo.id, ...values });
+          } else {
+            handleAddTodo(values);
+          }
+          handleCloseTodoModal();
+        }}
+        initialValues={editingTodo}
+        categories={categories}
+      />
+      <CategoryManagementModal
+        visible={isCategoryModalVisible}
+        onCancel={handleCloseCategoryModal}
+        categories={categories}
+        onCategoriesUpdate={fetchCategories}
+        messageApi={messageApi}
+      />
     </Layout>
   );
 };
+
+export default App;

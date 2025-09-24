@@ -7,37 +7,13 @@ import { motion } from 'framer-motion';
 const { Title, Text } = Typography;
 
 interface TodoItemProps {
-    todo: any;
-    onDelete: (id: number) => void;
-    onToggleCompleted: (id: number) => void;
+    todo: Todo;
+    onDelete: (id: string) => void;
+    onToggleCompleted: (id: string) => void;
     onEdit: (todo: Todo) => void;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onDelete, onToggleCompleted, onEdit }) => {
-    const handleDelete = () => {
-        if (todo.id) {
-            onDelete(todo.id);
-        } else {
-            console.error("Todo ID is undefined");
-        }
-    };
-
-    const handleToggleComplete = () => {
-        if (todo.id) {
-            onToggleCompleted(todo.id);
-        } else {
-            console.error("Todo ID is undefined");
-        }
-    };
-
-    const handleEdit = () => {
-        if (todo.id) {
-            onEdit(todo.id);
-        } else {
-            console.error("Todo ID is undefined");
-            // Tambahkan logika fallback
-        }
-    };
     const getPriorityColor = (priority: 'low' | 'medium' | 'high') => {
         switch (priority) {
             case 'high': return 'tag-priority-high';
@@ -69,15 +45,15 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onDelete, onToggleCompleted, 
                 </Space>
             </Space>
             <Space size="middle">
-                <Checkbox checked={todo.completed} onChange={handleToggleComplete} />
+                <Checkbox checked={todo.completed} onChange={() => onToggleCompleted(todo.id)} />
                 <Button
                     icon={<EditOutlined />}
-                    onClick={handleEdit}
+                    onClick={() => onEdit(todo)}
                     type="text"
                 />
                 <Button
                     icon={<DeleteOutlined />}
-                    onClick={handleDelete}
+                    onClick={() => onDelete(todo.id)}
                     type="text"
                     danger
                 />

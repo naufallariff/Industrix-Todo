@@ -7,7 +7,7 @@ import (
 )
 
 type TodoRepository interface {
-	FindWithPaginationAndSearch(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error)
+	FindWithPaginationAndSearch(page, limit int, search, status string, categoryID *uuid.UUID, priority string) ([]domain.Todo, int64, error)
 	FindByID(id uuid.UUID) (*domain.Todo, error)
 	Create(todo *domain.Todo) error
 	Update(todo *domain.Todo) error
@@ -22,7 +22,7 @@ func NewTodoRepository(db *gorm.DB) TodoRepository {
 	return &todoRepository{db: db}
 }
 
-func (r *todoRepository) FindWithPaginationAndSearch(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error) {
+func (r *todoRepository) FindWithPaginationAndSearch(page, limit int, search, status string, categoryID *uuid.UUID, priority string) ([]domain.Todo, int64, error) {
 	var todos []domain.Todo
 	var total int64
 
@@ -39,8 +39,8 @@ func (r *todoRepository) FindWithPaginationAndSearch(page, limit int, search, st
 			query = query.Where("completed = ?", false)
 		}
 	}
-	if categoryID != "" {
-		query = query.Where("category_id = ?", categoryID)
+	if categoryID != nil {
+		query = query.Where("category_id = ?", *categoryID)
 	}
 	if priority != "" {
 		query = query.Where("priority = ?", priority)

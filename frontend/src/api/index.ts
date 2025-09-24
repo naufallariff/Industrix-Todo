@@ -14,7 +14,7 @@ export interface GetTodosParams {
     page?: number;
     limit?: number;
     search?: string;
-    category_id?: number;
+    category_id?: string;
     priority?: 'low' | 'medium' | 'high';
 }
 
@@ -32,16 +32,16 @@ export interface CreateTodoPayload {
     title: string;
     description?: string;
     completed: boolean;
-    category_id?: number;
+    category_id?: string;
     priority: 'low' | 'medium' | 'high';
 }
 
 export interface UpdateTodoPayload {
-    id: number;
+    id: string;
     title?: string;
     description?: string;
     completed?: boolean;
-    category_id?: number;
+    category_id?: string;
     priority?: 'low' | 'medium' | 'high';
 }
 
@@ -80,7 +80,7 @@ export const updateTodo = async (editedTodo: UpdateTodoPayload): Promise<Todo> =
     }
 };
 
-export const deleteTodo = async (id: number): Promise<void> => {
+export const deleteTodo = async (id: string): Promise<void> => {
     try {
         await apiClient.delete(`/todos/${id}`);
     } catch (error) {
@@ -89,7 +89,7 @@ export const deleteTodo = async (id: number): Promise<void> => {
     }
 };
 
-export const toggleTodoCompletion = async (id: number, completed: boolean): Promise<Todo> => {
+export const toggleTodoCompletion = async (id: string, completed: boolean): Promise<Todo> => {
     try {
         const response = await apiClient.patch<Todo>(`/todos/${id}/complete`, { completed });
         return response.data;
@@ -118,7 +118,7 @@ export const createCategory = async (newCategory: CreateCategoryPayload): Promis
         throw error;
     }
 };
-export const deleteCategory = async (id: number): Promise<void> => {
+export const deleteCategory = async (id: string): Promise<void> => {
     try {
         const response = await apiClient.delete(`/categories/${id}`);
         return response.data;

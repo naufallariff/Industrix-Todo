@@ -1,16 +1,14 @@
-// frontend/src/types.ts
 import type { ReactNode } from 'react';
 
 export interface Category {
-    id: number;
+    id: string;
     name: string;
     color: string;
     icon?: ReactNode;
 }
 
 export interface Todo {
-    [x: string]: any;
-    id: number;
+    id: string;
     title: string;
     description?: { String: string; Valid: boolean };
     completed: boolean;

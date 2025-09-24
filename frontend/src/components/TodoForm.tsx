@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, Form, Input, Checkbox, Select, DatePicker } from "antd";
-import dayjs from "dayjs";
+import { Modal, Form, Input, Checkbox, Select } from "antd";
 import type { Todo, Category } from "../types";
 
 const { Option } = Select;
@@ -30,8 +29,6 @@ const TodoForm: React.FC<TodoFormProps> = ({
           ...initialValues,
           description: initialValues.description?.String,
           category: initialValues.category?.id,
-          // Perbaikan: Set nilai DueDate menggunakan dayjs jika ada
-          dueDate: initialValues.dueDate?.Valid ? dayjs(initialValues.dueDate.Time) : null,
         });
       }
     }
@@ -48,8 +45,6 @@ const TodoForm: React.FC<TodoFormProps> = ({
           ...values,
           category: selectedCategory,
           completed: values.completed || false,
-          // Perbaikan: Tambahkan DueDate ke payload
-          dueDate: values.dueDate?.toDate(),
         });
         form.resetFields();
       })
@@ -92,9 +87,6 @@ const TodoForm: React.FC<TodoFormProps> = ({
             <Option value="medium">Sedang</Option>
             <Option value="low">Rendah</Option>
           </Select>
-        </Form.Item>
-        <Form.Item name="dueDate" label="Batas Waktu">
-          <DatePicker style={{ width: '100%' }} showTime format="YYYY-MM-DD HH:mm:ss" />
         </Form.Item>
         <Form.Item name="completed" valuePropName="checked">
           <Checkbox>Selesai</Checkbox>
