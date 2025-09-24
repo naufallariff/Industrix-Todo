@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, ColorPicker, List, Space, Tooltip } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'; // Removed EditOutlined
 import type { Category } from '../types';
 import { createCategory, deleteCategory } from '../api';
 import type { MessageInstance } from 'antd/es/message/interface';
+import axios from 'axios';
 
 interface CategoryManagementModalProps {
     visible: boolean;
@@ -13,6 +14,7 @@ interface CategoryManagementModalProps {
     messageApi: MessageInstance;
 }
 
+// DEFINISI FUNGSI DIPINDAHKAN KE SINI (GLOBAL SCOPE)
 const generateRandomDarkColor = () => {
     let color = '#000000';
     do {
@@ -37,10 +39,13 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
     const [form] = Form.useForm();
     const [color, setColor] = useState<string>(generateRandomDarkColor());
     const [loading, setLoading] = useState(false);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         if (visible) {
             form.resetFields();
+            // Panggilan di sini sudah benar
             setColor(generateRandomDarkColor());
         }
     }, [visible, form]);
@@ -52,33 +57,42 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
             onCategoriesUpdate();
             messageApi.success('Kategori berhasil dibuat!');
             form.resetFields();
+            // Panggilan di sini sudah benar
             setColor(generateRandomDarkColor());
         } catch (error) {
-            console.error('Gagal membuat kategori baru:', error);
-            messageApi.error('Gagal membuat kategori.');
+            if (axios.isAxiosError(error) && error.response?.status === 500) {
+                const errorMessage = error.response.data?.error || '';
+                if (errorMessage.includes("duplicate key value violates unique constraint")) {
+                    messageApi.error(`Nama kategori sudah ada.`);
+                } else {
+                    messageApi.error('Gagal membuat kategori. Terjadi kesalahan server.');
+                }
+            } else {
+                console.error('Gagal membuat kategori baru:', error);
+                messageApi.error('Gagal membuat kategori.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDeleteCategory = (categoryId: string) => {
-        Modal.confirm({
-            title: 'Konfirmasi Hapus Kategori',
-            content: 'Apakah Anda yakin ingin menghapus kategori ini? To-Do yang terkait akan kehilangan kategorinya.',
-            okText: 'Hapus',
-            okType: 'danger',
-            cancelText: 'Batal',
-            onOk: async () => {
-                try {
-                    await deleteCategory(categoryId);
-                    onCategoriesUpdate();
-                    messageApi.success('Kategori berhasil dihapus!');
-                } catch (error) {
-                    console.error('Gagal menghapus kategori:', error);
-                    messageApi.error('Gagal menghapus kategori.');
-                }
-            },
-        });
+    const handleDeleteClick = (categoryId: string) => {
+        setCategoryToDelete(categoryId);
+        setIsDeleteModalVisible(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!categoryToDelete) return;
+
+        try {
+            await deleteCategory(categoryToDelete);
+            onCategoriesUpdate();
+            messageApi.success('Kategori berhasil dihapus!');
+            setIsDeleteModalVisible(false);
+        } catch (error) {
+            console.error('Gagal menghapus kategori:', error);
+            messageApi.error('Gagal menghapus kategori.');
+        }
     };
 
     return (
@@ -128,7 +142,7 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
                                     size="small"
                                     type="text"
                                     danger
-                                    onClick={() => handleDeleteCategory(item.id)}
+                                    onClick={() => handleDeleteClick(item.id)}
                                 />
                             </Tooltip>
                         ]}
@@ -139,6 +153,17 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
                     </List.Item>
                 )}
             />
+            <Modal
+                title="Konfirmasi Hapus Kategori"
+                open={isDeleteModalVisible}
+                onOk={handleDeleteConfirm}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText="Hapus"
+                okType="danger"
+                cancelText="Batal"
+            >
+                <p>Apakah Anda yakin ingin menghapus kategori ini? To-Do yang terkait akan kehilangan kategorinya.</p>
+            </Modal>
         </Modal>
     );
 };

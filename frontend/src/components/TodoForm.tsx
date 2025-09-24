@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { Modal, Form, Input, Checkbox, Select } from "antd";
-import type { Todo, Category } from "../types";
+import type { Todo, Category, TodoFormValues } from "../types";
 
 const { Option } = Select;
 
 interface TodoFormProps {
   visible: boolean;
   onCancel: () => void;
-  onOk: (values: Omit<Todo, "id">) => void;
+  onOk: (values: TodoFormValues) => void;
   initialValues?: Todo;
   categories: Category[];
 }

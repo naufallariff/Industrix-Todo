@@ -23,8 +23,8 @@ CREATE TABLE todos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ,
-    -- Add foreign key constraint to categories with UUID type
-    CONSTRAINT fk_category
+        -- Add foreign key constraint to categories with UUID type
+        CONSTRAINT fk_category
         FOREIGN KEY(category_id)
         REFERENCES categories(id)
         ON DELETE SET NULL

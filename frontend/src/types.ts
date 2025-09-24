@@ -15,3 +15,11 @@ export interface Todo {
     category?: Category;
     priority: 'low' | 'medium' | 'high';
 }
+
+export interface TodoFormValues {
+    title: string;
+    description?: string;
+    completed: boolean;
+    category?: Category;
+    priority: 'low' | 'medium' | 'high';
+}

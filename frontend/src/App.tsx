@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Typography, message, Card, Button, Space } from 'antd';
+import { Layout, Typography, message, Card, Button, Space, Modal } from 'antd'; // Import Modal
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
 import TodoFilters from './components/TodoFilters';
 import TodoForm from './components/TodoForm';
 import CategoryManagementModal from './components/CategoryManagementModal';
-import type { Todo, Category } from './types';
+import type { Todo, Category, TodoFormValues } from './types';
 import { getTodos, createTodo, updateTodo, deleteTodo, toggleTodoCompletion, getCategories } from './api';
 import type { GetTodosParams, CreateTodoPayload, UpdateTodoPayload } from './api';
 
@@ -69,11 +69,11 @@ const App: React.FC = () => {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleAddTodo = async (newTodo: Omit<Todo, 'id'>) => {
+  const handleAddTodo = async (newTodo: TodoFormValues) => {
     try {
       const payload: CreateTodoPayload = {
         title: newTodo.title,
-        description: newTodo.description?.String,
+        description: newTodo.description,
         completed: newTodo.completed,
         category_id: newTodo.category?.id,
         priority: newTodo.priority,
@@ -86,12 +86,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleEditTodo = async (editedTodo: Todo) => {
+  const handleEditTodo = async (editedTodo: TodoFormValues & { id: string }) => {
     try {
       const payload: UpdateTodoPayload = {
         id: editedTodo.id,
         title: editedTodo.title,
-        description: editedTodo.description?.String,
+        description: editedTodo.description,
         completed: editedTodo.completed,
         category_id: editedTodo.category?.id,
         priority: editedTodo.priority,
@@ -112,6 +112,20 @@ const App: React.FC = () => {
     } catch (error) {
       messageApi.error('Gagal menghapus to-do.');
     }
+  };
+
+  const handleConfirmDeleteTodo = (todo: Todo) => {
+    Modal.confirm({
+      title: 'Hapus To-Do',
+      content: `Anda yakin ingin menghapus to-do "${todo.title}"?`,
+      okText: 'Hapus',
+      okType: 'danger',
+      cancelText: 'Batal',
+      onOk() {
+        // Panggil fungsi delete yang sebenarnya setelah konfirmasi
+        handleDeleteTodo(todo.id);
+      },
+    });
   };
 
   const handleToggleCompleted = async (id: string) => {
@@ -194,7 +208,7 @@ const App: React.FC = () => {
               pageSize: pagination.pageSize,
               onChange: handlePageChange,
             }}
-            onDeleteTodo={handleDeleteTodo}
+            onConfirmDelete={handleConfirmDeleteTodo} // Pass the confirmation handler
             onToggleCompleted={handleToggleCompleted}
             onEdit={handleOpenTodoModal}
           />

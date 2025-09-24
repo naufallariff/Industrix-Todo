@@ -14,7 +14,7 @@ interface TodoListProps {
         pageSize: number;
         onChange: (page: number, pageSize: number) => void;
     };
-    onDeleteTodo: (id: string) => void;
+    onConfirmDelete: (todo: Todo) => void; // New prop for delete confirmation
     onToggleCompleted: (id: string) => void;
     onEdit: (todo: Todo) => void;
 }
@@ -23,14 +23,14 @@ const TodoList: React.FC<TodoListProps> = ({
     todos,
     loading,
     pagination,
-    onDeleteTodo,
+    onConfirmDelete, // Use the new prop
     onToggleCompleted,
     onEdit,
 }) => {
     return (
         <Card
             title={
-                <Title level={2} style={{ margin: 0 }} className="gradient-text">Daftar Tugas</Title>
+                <Title level={3} style={{ margin: 0 }}>Daftar Tugas</Title>
             }
             style={{ width: '100%', maxWidth: '900px' }}
             loading={loading}
@@ -43,7 +43,7 @@ const TodoList: React.FC<TodoListProps> = ({
                         <TodoItem
                             key={item.id}
                             todo={item}
-                            onDelete={onDeleteTodo}
+                            onConfirmDelete={onConfirmDelete} // Pass the new prop
                             onToggleCompleted={onToggleCompleted}
                             onEdit={onEdit}
                         />
