@@ -14,7 +14,10 @@ const { Content, Footer } = Layout;
 const { Text } = Typography;
 
 const App: React.FC = () => {
-  const [messageApi, contextHolder] = message.useMessage();
+  // Contextual Hooks untuk Notifikasi dan Modal
+  const [messageApi, messageContextHolder] = message.useMessage();
+  const [modalApi, modalContextHolder] = Modal.useModal(); // PERBAIKAN: Gunakan Modal.useModal()
+
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,8 +117,9 @@ const App: React.FC = () => {
     }
   };
 
+  // PERBAIKAN: Menggunakan modalApi.confirm
   const handleConfirmDeleteTodo = (todo: Todo) => {
-    Modal.confirm({
+    modalApi.confirm({
       title: 'Hapus To-Do',
       content: `Anda yakin ingin menghapus to-do "${todo.title}"?`,
       okText: 'Hapus',
@@ -175,7 +179,8 @@ const App: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-      {contextHolder}
+      {messageContextHolder}
+      {modalContextHolder}
       <Header />
       <Content className="main-container">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '900px' }}>
@@ -208,7 +213,7 @@ const App: React.FC = () => {
               pageSize: pagination.pageSize,
               onChange: handlePageChange,
             }}
-            onConfirmDelete={handleConfirmDeleteTodo} // Pass the confirmation handler
+            onConfirmDelete={handleConfirmDeleteTodo}
             onToggleCompleted={handleToggleCompleted}
             onEdit={handleOpenTodoModal}
           />

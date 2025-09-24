@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, ColorPicker, List, Space, Tooltip } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'; // Removed EditOutlined
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { Category } from '../types';
 import { createCategory, deleteCategory } from '../api';
 import type { MessageInstance } from 'antd/es/message/interface';
@@ -14,7 +14,6 @@ interface CategoryManagementModalProps {
     messageApi: MessageInstance;
 }
 
-// DEFINISI FUNGSI DIPINDAHKAN KE SINI (GLOBAL SCOPE)
 const generateRandomDarkColor = () => {
     let color = '#000000';
     do {
@@ -45,7 +44,6 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
     useEffect(() => {
         if (visible) {
             form.resetFields();
-            // Panggilan di sini sudah benar
             setColor(generateRandomDarkColor());
         }
     }, [visible, form]);
@@ -57,16 +55,10 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
             onCategoriesUpdate();
             messageApi.success('Kategori berhasil dibuat!');
             form.resetFields();
-            // Panggilan di sini sudah benar
             setColor(generateRandomDarkColor());
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 500) {
-                const errorMessage = error.response.data?.error || '';
-                if (errorMessage.includes("duplicate key value violates unique constraint")) {
-                    messageApi.error(`Nama kategori sudah ada.`);
-                } else {
-                    messageApi.error('Gagal membuat kategori. Terjadi kesalahan server.');
-                }
+            if (axios.isAxiosError(error) && error.response?.status === 500 && error.response.data?.error.includes("violates unique constraint")) {
+                messageApi.error('Nama kategori sudah ada.');
             } else {
                 console.error('Gagal membuat kategori baru:', error);
                 messageApi.error('Gagal membuat kategori.');

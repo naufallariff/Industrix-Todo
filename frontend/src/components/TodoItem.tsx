@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Space, Button, Checkbox, Tag } from 'antd'; // Removed Modal import
+import { Typography, Space, Button, Checkbox, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Todo } from '../types';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ const { Title, Text } = Typography;
 
 interface TodoItemProps {
     todo: Todo;
-    onConfirmDelete: (todo: Todo) => void; // New prop for confirmation logic
+    onConfirmDelete: (todo: Todo) => void;
     onToggleCompleted: (id: string) => void;
     onEdit: (todo: Todo) => void;
 }
@@ -22,8 +22,6 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onConfirmDelete, onToggleComp
             default: return '';
         }
     };
-
-    // Konfirmasi dihapus dari sini dan dipindahkan ke App.tsx
 
     return (
         <motion.div
@@ -55,7 +53,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onConfirmDelete, onToggleComp
                 />
                 <Button
                     icon={<DeleteOutlined />}
-                    onClick={() => onConfirmDelete(todo)} // Panggil handler dari parent
+                    onClick={() => onConfirmDelete(todo)}
                     type="text"
                     danger
                 />
