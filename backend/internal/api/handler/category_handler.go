@@ -2,9 +2,9 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
@@ -45,7 +45,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID", err.Error())
 		return
@@ -57,7 +57,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	category, err := h.service.UpdateCategory(uint(id), req)
+	category, err := h.service.UpdateCategory(id, req)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			util.ErrorResponse(c, http.StatusNotFound, "Category not found")
@@ -71,13 +71,13 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID", err.Error())
 		return
 	}
 
-	if err := h.service.DeleteCategory(uint(id)); err != nil {
+	if err := h.service.DeleteCategory(id); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			util.ErrorResponse(c, http.StatusNotFound, "Category not found")
 			return
@@ -89,21 +89,21 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
-    idStr := c.Param("id")
-    id, err := strconv.ParseUint(idStr, 10, 64)
-    if err != nil {
-        util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID", err.Error())
-        return
-    }
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		util.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID", err.Error())
+		return
+	}
 
-    category, err := h.service.FindCategoryByID(uint(id))
-    if err != nil {
-        if err == gorm.ErrRecordNotFound {
-            util.ErrorResponse(c, http.StatusNotFound, "Category not found")
-            return
-        }
-        util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve category", err.Error())
-        return
-    }
-    c.JSON(http.StatusOK, category)
+	category, err := h.service.FindCategoryByID(id)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			util.ErrorResponse(c, http.StatusNotFound, "Category not found")
+			return
+		}
+		util.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve category", err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, category)
 }

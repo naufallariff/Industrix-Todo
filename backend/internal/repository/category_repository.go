@@ -1,16 +1,17 @@
 package repository
 
 import (
+	"github.com/google/uuid"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"gorm.io/gorm"
 )
 
 type CategoryRepository interface {
 	FindAll() ([]domain.Category, error)
-	FindByID(id uint) (*domain.Category, error)
+	FindByID(id uuid.UUID) (*domain.Category, error)
 	Create(category *domain.Category) error
 	Update(category *domain.Category) error
-	Delete(id uint) error
+	Delete(id uuid.UUID) error
 }
 
 type categoryRepository struct {
@@ -29,7 +30,7 @@ func (r *categoryRepository) FindAll() ([]domain.Category, error) {
 	return categories, nil
 }
 
-func (r *categoryRepository) FindByID(id uint) (*domain.Category, error) {
+func (r *categoryRepository) FindByID(id uuid.UUID) (*domain.Category, error) {
 	var category domain.Category
 	if err := r.db.First(&category, id).Error; err != nil {
 		return nil, err
@@ -45,6 +46,6 @@ func (r *categoryRepository) Update(category *domain.Category) error {
 	return r.db.Save(category).Error
 }
 
-func (r *categoryRepository) Delete(id uint) error {
+func (r *categoryRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&domain.Category{}, id).Error
 }

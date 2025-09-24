@@ -2,17 +2,18 @@ package service
 
 import (
 	"database/sql"
+	"github.com/google/uuid"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/repository"
 )
 
 type TodoService interface {
 	GetTodos(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error)
-	GetTodoByID(id uint) (*domain.Todo, error)
+	GetTodoByID(id uuid.UUID) (*domain.Todo, error)
 	CreateTodo(req domain.NewTodoRequest) (*domain.Todo, error)
-	UpdateTodo(id uint, req domain.UpdateTodoRequest) (*domain.Todo, error)
-	ToggleCompleted(id uint) (*domain.Todo, error)
-	DeleteTodo(id uint) error
+	UpdateTodo(id uuid.UUID, req domain.UpdateTodoRequest) (*domain.Todo, error)
+	ToggleCompleted(id uuid.UUID) (*domain.Todo, error)
+	DeleteTodo(id uuid.UUID) error
 }
 
 type todoService struct {
@@ -27,7 +28,7 @@ func (s *todoService) GetTodos(page, limit int, search, status, categoryID, prio
 	return s.repo.FindWithPaginationAndSearch(page, limit, search, status, categoryID, priority)
 }
 
-func (s *todoService) GetTodoByID(id uint) (*domain.Todo, error) {
+func (s *todoService) GetTodoByID(id uuid.UUID) (*domain.Todo, error) {
 	return s.repo.FindByID(id)
 }
 
@@ -47,7 +48,7 @@ func (s *todoService) CreateTodo(req domain.NewTodoRequest) (*domain.Todo, error
 		todo.DueDate = sql.NullTime{Time: *req.DueDate, Valid: true}
 	}
 	if req.CategoryID != nil {
-		todo.CategoryID = sql.NullInt64{Int64: int64(*req.CategoryID), Valid: true}
+		todo.CategoryID = req.CategoryID
 	}
 
 	if err := s.repo.Create(todo); err != nil {
@@ -56,7 +57,7 @@ func (s *todoService) CreateTodo(req domain.NewTodoRequest) (*domain.Todo, error
 	return todo, nil
 }
 
-func (s *todoService) UpdateTodo(id uint, req domain.UpdateTodoRequest) (*domain.Todo, error) {
+func (s *todoService) UpdateTodo(id uuid.UUID, req domain.UpdateTodoRequest) (*domain.Todo, error) {
 	todo, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func (s *todoService) UpdateTodo(id uint, req domain.UpdateTodoRequest) (*domain
 		todo.DueDate = sql.NullTime{Time: *req.DueDate, Valid: true}
 	}
 	if req.CategoryID != nil {
-		todo.CategoryID = sql.NullInt64{Int64: int64(*req.CategoryID), Valid: true}
+		todo.CategoryID = req.CategoryID
 	}
 
 	if err := s.repo.Update(todo); err != nil {
@@ -87,7 +88,7 @@ func (s *todoService) UpdateTodo(id uint, req domain.UpdateTodoRequest) (*domain
 	return todo, nil
 }
 
-func (s *todoService) ToggleCompleted(id uint) (*domain.Todo, error) {
+func (s *todoService) ToggleCompleted(id uuid.UUID) (*domain.Todo, error) {
 	todo, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -99,6 +100,6 @@ func (s *todoService) ToggleCompleted(id uint) (*domain.Todo, error) {
 	return todo, nil
 }
 
-func (s *todoService) DeleteTodo(id uint) error {
+func (s *todoService) DeleteTodo(id uuid.UUID) error {
 	return s.repo.Delete(id)
 }

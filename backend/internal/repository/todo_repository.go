@@ -1,16 +1,17 @@
 package repository
 
 import (
+	"github.com/google/uuid"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"gorm.io/gorm"
 )
 
 type TodoRepository interface {
 	FindWithPaginationAndSearch(page, limit int, search, status, categoryID, priority string) ([]domain.Todo, int64, error)
-	FindByID(id uint) (*domain.Todo, error)
+	FindByID(id uuid.UUID) (*domain.Todo, error)
 	Create(todo *domain.Todo) error
 	Update(todo *domain.Todo) error
-	Delete(id uint) error
+	Delete(id uuid.UUID) error
 }
 
 type todoRepository struct {
@@ -58,7 +59,7 @@ func (r *todoRepository) FindWithPaginationAndSearch(page, limit int, search, st
 	return todos, total, nil
 }
 
-func (r *todoRepository) FindByID(id uint) (*domain.Todo, error) {
+func (r *todoRepository) FindByID(id uuid.UUID) (*domain.Todo, error) {
 	var todo domain.Todo
 	if err := r.db.Preload("Category").First(&todo, id).Error; err != nil {
 		return nil, err
@@ -74,6 +75,6 @@ func (r *todoRepository) Update(todo *domain.Todo) error {
 	return r.db.Save(todo).Error
 }
 
-func (r *todoRepository) Delete(id uint) error {
+func (r *todoRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&domain.Todo{}, id).Error
 }

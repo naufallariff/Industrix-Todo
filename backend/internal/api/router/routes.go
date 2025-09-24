@@ -21,7 +21,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 	v1 := r.Group("/api/v1")
 	{
-		// Todos endpoints
 		todos := v1.Group("/todos")
 		todos.GET("/", todoHandler.GetTodos)
 		todos.POST("/", todoHandler.CreateTodo)
@@ -30,7 +29,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		todos.PATCH("/:id/complete", todoHandler.ToggleCompleted)
 		todos.DELETE("/:id", todoHandler.DeleteTodo)
 
-		// Categories endpoints
 		categories := v1.Group("/categories")
 		categories.GET("/", categoryHandler.GetAllCategories)
 		categories.POST("/", categoryHandler.CreateCategory)

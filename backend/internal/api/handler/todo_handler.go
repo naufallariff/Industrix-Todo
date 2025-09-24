@@ -5,10 +5,12 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+
 	"github.com/naufallariff/Industrix-Todo/backend/internal/domain"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/service"
 	"github.com/naufallariff/Industrix-Todo/backend/internal/util"
-	"gorm.io/gorm"
 )
 
 type TodoHandler struct {
@@ -36,11 +38,12 @@ func (h *TodoHandler) GetTodos(c *gin.Context) {
 		return
 	}
 
+	totalPages := (total + int64(limit) - 1) / int64(limit)
 	pagination := gin.H{
 		"page":  page,
 		"limit": limit,
 		"total": total,
-		"pages": (total + int64(limit) - 1) / int64(limit),
+		"pages": totalPages,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -48,15 +51,16 @@ func (h *TodoHandler) GetTodos(c *gin.Context) {
 		"pagination": pagination,
 	})
 }
+
 func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid todo ID"})
 		return
 	}
 
-	todo, err := h.service.GetTodoByID(uint(id))
+	todo, err := h.service.GetTodoByID(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			util.ErrorResponse(c, http.StatusNotFound, "Todo not found")
@@ -85,7 +89,7 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 
 func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid todo ID"})
 		return
@@ -97,7 +101,7 @@ func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 		return
 	}
 
-	todo, err := h.service.UpdateTodo(uint(id), req)
+	todo, err := h.service.UpdateTodo(id, req)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
@@ -111,13 +115,13 @@ func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 
 func (h *TodoHandler) ToggleCompleted(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid todo ID"})
 		return
 	}
 
-	todo, err := h.service.ToggleCompleted(uint(id))
+	todo, err := h.service.ToggleCompleted(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
@@ -131,14 +135,13 @@ func (h *TodoHandler) ToggleCompleted(c *gin.Context) {
 
 func (h *TodoHandler) DeleteTodo(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid todo ID"})
 		return
 	}
 
-	err = h.service.DeleteTodo(uint(id))
-	if err != nil {
+	if err := h.service.DeleteTodo(id); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
 			return
@@ -146,6 +149,5 @@ func (h *TodoHandler) DeleteTodo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete todo"})
 		return
 	}
-
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusNoContent, nil)
 }
