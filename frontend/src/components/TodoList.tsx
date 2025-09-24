@@ -30,7 +30,7 @@ const TodoList: React.FC<TodoListProps> = ({
     return (
         <Card
             title={
-                <Title level={3} style={{ margin: 0 }}>Daftar Tugas</Title>
+                <Title level={2} style={{ margin: 0 }} className="gradient-text">Daftar Tugas</Title>
             }
             style={{ width: '100%', maxWidth: '900px' }}
             loading={loading}

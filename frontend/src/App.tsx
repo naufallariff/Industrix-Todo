@@ -11,7 +11,7 @@ import { getTodos, createTodo, updateTodo, deleteTodo, toggleTodoCompletion, get
 import type { GetTodosParams, CreateTodoPayload, UpdateTodoPayload } from './api';
 
 const { Content, Footer } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const App: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -164,7 +164,6 @@ const App: React.FC = () => {
       {contextHolder}
       <Header />
       <Content className="main-container">
-        <Title level={2} className="gradient-text">To-Do Dashboard</Title>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '900px' }}>
           <Card
             title="Filter & Pencarian"
